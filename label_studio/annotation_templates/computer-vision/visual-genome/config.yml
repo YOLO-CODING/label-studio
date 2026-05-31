@@ -1,0 +1,123 @@
+# title: Visual Genome
+# type: community
+# group: Computer Vision
+# image: /static/templates/visual-genome.png
+# details: <h1>Label different described features</h1>
+# config: |
+#   <View>
+#     <View style="display: flex; flex-wrap: wrap;">
+#       <View className="label-column">
+#         <Header value="Regions"/>
+#         <RectangleLabels name="regions" toName="image" value="$regions"/>
+#     </View>
+#       <View className="label-column">
+#         <Header value="Attributes"/>
+#       <RectangleLabels name="attributes" toName="image" value="$attributes"/>
+#       </View>
+#       <View className="label-column">
+#         <Header value="Relationships"/>
+#       <RectangleLabels name="relationships" toName="image" value="$relationships"/>
+#       </View>
+   
+#     </View>
+#     <Image name="image" value="$image"/>
+#     <Style>
+#     .label-column .lsf-labels {
+#       display: flex;
+#       flex-direction: column;
+#       align-items: flex-start;
+#     }
+#     </Style>
+#   </View>
+#   <!-- { "data": {
+#     "image": "https://htx-pub.s3.amazonaws.com/templates/visual-genome/panda.jpeg",
+#     "regions": [{
+#       "value": "panda bear holding something in it's paw"
+#     }, {
+#       "value": "trees behind the panda out of focus"
+#     }, {
+#         "value": "piece of bamboo in panda's paw"
+#       }, {
+#         "value": "bamboo next to panda"
+#       }, {
+#         "value": "the panda is cute"
+#       }],
+#     "attributes": [{
+#       "value": "markings is black"
+#     }, {
+#       "value": "nose is black"
+#     }, {
+#       "value": "face is round"
+#     }, {
+#         "value": "wood is round"
+#       }],
+#     "relationships": [{
+#       "value": "hole ON log"
+#     }, {
+#       "value": "tree BEHIND bear"
+#     }, {
+#         "value": "mouth OF panda"
+#       }]
+#   }}-->
+
+title: 视觉基因组标注
+type: community
+group: Computer Vision
+image: /static/templates/visual-genome.png
+details: <h1>标注图像中的不同描述性特征</h1>
+config: |
+  <View>
+    <View style="display: flex; flex-wrap: wrap;">
+      <View className="label-column">
+        <Header value="区域描述"/>
+        <RectangleLabels name="regions" toName="image" value="$regions"/>
+    </View>
+      <View className="label-column">
+        <Header value="属性特征"/>
+      <RectangleLabels name="attributes" toName="image" value="$attributes"/>
+      </View>
+      <View className="label-column">
+        <Header value="空间关系"/>
+      <RectangleLabels name="relationships" toName="image" value="$relationships"/>
+      </View>
+
+    </View>
+    <Image name="image" value="$image"/>
+    <Style>
+    .label-column .lsf-labels {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    </Style>
+  </View>
+  <!-- { "data": {
+    "image": "https://htx-pub.s3.amazonaws.com/templates/visual-genome/panda.jpeg",
+    "regions": [{
+      "value": "熊猫爪子里拿着东西"
+    }, {
+      "value": "熊猫后方背景虚化的树木"
+    }, {
+        "value": "熊猫爪子里的竹子"
+      }, {
+        "value": "熊猫旁边的竹子"
+      }, {
+        "value": "熊猫很可爱"
+      }],
+    "attributes": [{
+      "value": "斑纹是黑色的"
+    }, {
+      "value": "鼻子是黑色的"
+    }, {
+      "value": "脸是圆形的"
+    }, {
+        "value": "木头是圆形的"
+      }],
+    "relationships": [{
+      "value": "洞在木头上"
+    }, {
+      "value": "树在熊后面"
+    }, {
+        "value": "熊猫的嘴巴"
+      }]
+  }}-->

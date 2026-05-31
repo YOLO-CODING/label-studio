@@ -1,0 +1,827 @@
+[
+    {
+        "id": 3,
+        "status": "success",
+        "sources": {
+            "file_name": "卫星图文件名",
+            "file_format": "tiff",
+            "file_size": "10823780000",
+            "batch_id": "批次标识0003",
+            "timestamp": "2026-02-02T14:00:00Z",
+            "full_extent": {
+                "min_longitude": 108.468064,
+                "max_longitude": 111.049645,
+                "min_latitude": 18.137715,
+                "max_latitude": 20.183882
+            },
+            "resolution": "5",
+            "crs": "WGS84"
+        },
+        "summary": {
+            "total_regions": 2,
+            "processed_regions": 2,
+            "total_ships": 20,
+            "categories_summary": {
+                "ship": 20
+            }
+        },
+        "regions": [
+            {
+                "region_id": "5",
+                "status": "success",
+                "extent": {
+                    "min_longitude": 109.3,
+                    "max_longitude": 109.8,
+                    "min_latitude": 19.2,
+                    "max_latitude": 19.7
+                },
+                "ship_count": "12",
+                "image_path": null
+            },
+            {
+                "region_id": "6",
+                "status": "success",
+                "extent": {
+                    "min_longitude": 110.4,
+                    "max_longitude": 110.9,
+                    "min_latitude": 18.0,
+                    "max_latitude": 18.5
+                },
+                "ship_count": "8",
+                "image_path": null
+            }
+        ],
+        "ships": [
+            {
+                "id": 41,
+                "ship_id": "船只5-1",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.45,
+                    "latitude": 19.25
+                },
+                "category": "ship",
+                "confidence": "0.88"
+            },
+            {
+                "id": 42,
+                "ship_id": "船只5-2",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.55,
+                    "latitude": 19.3
+                },
+                "category": "ship",
+                "confidence": "0.82"
+            },
+            {
+                "id": 43,
+                "ship_id": "船只5-3",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.35,
+                    "latitude": 19.35
+                },
+                "category": "ship",
+                "confidence": "0.91"
+            },
+            {
+                "id": 44,
+                "ship_id": "船只5-4",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.65,
+                    "latitude": 19.4
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 45,
+                "ship_id": "船只5-5",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.5,
+                    "latitude": 19.45
+                },
+                "category": "ship",
+                "confidence": "0.83"
+            },
+            {
+                "id": 46,
+                "ship_id": "船只5-6",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.4,
+                    "latitude": 19.5
+                },
+                "category": "ship",
+                "confidence": "0.89"
+            },
+            {
+                "id": 47,
+                "ship_id": "船只5-7",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.7,
+                    "latitude": 19.55
+                },
+                "category": "ship",
+                "confidence": "0.84"
+            },
+            {
+                "id": 48,
+                "ship_id": "船只5-8",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.6,
+                    "latitude": 19.6
+                },
+                "category": "ship",
+                "confidence": "0.86"
+            },
+            {
+                "id": 49,
+                "ship_id": "船只5-9",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.45,
+                    "latitude": 19.65
+                },
+                "category": "ship",
+                "confidence": "0.90"
+            },
+            {
+                "id": 50,
+                "ship_id": "船只5-10",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.75,
+                    "latitude": 19.25
+                },
+                "category": "ship",
+                "confidence": "0.82"
+            },
+            {
+                "id": 51,
+                "ship_id": "船只5-11",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.38,
+                    "latitude": 19.28
+                },
+                "category": "ship",
+                "confidence": "0.87"
+            },
+            {
+                "id": 52,
+                "ship_id": "船只5-12",
+                "region_id": "5",
+                "position": {
+                    "longitude": 109.68,
+                    "latitude": 19.68
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 53,
+                "ship_id": "船只6-1",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.5,
+                    "latitude": 18.1
+                },
+                "category": "ship",
+                "confidence": "0.84"
+            },
+            {
+                "id": 54,
+                "ship_id": "船只6-2",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.6,
+                    "latitude": 18.15
+                },
+                "category": "ship",
+                "confidence": "0.89"
+            },
+            {
+                "id": 55,
+                "ship_id": "船只6-3",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.45,
+                    "latitude": 18.2
+                },
+                "category": "ship",
+                "confidence": "0.86"
+            },
+            {
+                "id": 56,
+                "ship_id": "船只6-4",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.7,
+                    "latitude": 18.25
+                },
+                "category": "ship",
+                "confidence": "0.83"
+            },
+            {
+                "id": 57,
+                "ship_id": "船只6-5",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.55,
+                    "latitude": 18.3
+                },
+                "category": "ship",
+                "confidence": "0.90"
+            },
+            {
+                "id": 58,
+                "ship_id": "船只6-6",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.65,
+                    "latitude": 18.35
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 59,
+                "ship_id": "船只6-7",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.5,
+                    "latitude": 18.4
+                },
+                "category": "ship",
+                "confidence": "0.88"
+            },
+            {
+                "id": 60,
+                "ship_id": "船只6-8",
+                "region_id": "6",
+                "position": {
+                    "longitude": 110.75,
+                    "latitude": 18.45
+                },
+                "category": "ship",
+                "confidence": "0.82"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "status": "success",
+        "sources": {
+            "file_name": "卫星图文件名",
+            "file_format": "tiff",
+            "file_size": "10823780000",
+            "batch_id": "批次标识0002",
+            "timestamp": "2026-02-02T13:00:00Z",
+            "full_extent": {
+                "min_longitude": 108.468064,
+                "max_longitude": 111.049645,
+                "min_latitude": 18.137715,
+                "max_latitude": 20.183882
+            },
+            "resolution": "5",
+            "crs": "WGS84"
+        },
+        "summary": {
+            "total_regions": 2,
+            "processed_regions": 2,
+            "total_ships": 20,
+            "categories_summary": {
+                "ship": 20
+            }
+        },
+        "regions": [
+            {
+                "region_id": "3",
+                "status": "success",
+                "extent": {
+                    "min_longitude": 108.85,
+                    "max_longitude": 109.25,
+                    "min_latitude": 19.5,
+                    "max_latitude": 19.9
+                },
+                "ship_count": "10",
+                "image_path": null
+            },
+            {
+                "region_id": "4",
+                "status": "success",
+                "extent": {
+                    "min_longitude": 110.0,
+                    "max_longitude": 110.6,
+                    "min_latitude": 18.3,
+                    "max_latitude": 18.7
+                },
+                "ship_count": "10",
+                "image_path": null
+            }
+        ],
+        "ships": [
+            {
+                "id": 21,
+                "ship_id": "船只3-1",
+                "region_id": "3",
+                "position": {
+                    "longitude": 108.92,
+                    "latitude": 19.6
+                },
+                "category": "ship",
+                "confidence": "0.86"
+            },
+            {
+                "id": 22,
+                "ship_id": "船只3-2",
+                "region_id": "3",
+                "position": {
+                    "longitude": 109.05,
+                    "latitude": 19.55
+                },
+                "category": "ship",
+                "confidence": "0.87"
+            },
+            {
+                "id": 23,
+                "ship_id": "船只3-3",
+                "region_id": "3",
+                "position": {
+                    "longitude": 108.88,
+                    "latitude": 19.7
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 24,
+                "ship_id": "船只3-4",
+                "region_id": "3",
+                "position": {
+                    "longitude": 109.12,
+                    "latitude": 19.65
+                },
+                "category": "ship",
+                "confidence": "0.88"
+            },
+            {
+                "id": 25,
+                "ship_id": "船只3-5",
+                "region_id": "3",
+                "position": {
+                    "longitude": 109.0,
+                    "latitude": 19.75
+                },
+                "category": "ship",
+                "confidence": "0.84"
+            },
+            {
+                "id": 26,
+                "ship_id": "船只3-6",
+                "region_id": "3",
+                "position": {
+                    "longitude": 108.95,
+                    "latitude": 19.8
+                },
+                "category": "ship",
+                "confidence": "0.86"
+            },
+            {
+                "id": 27,
+                "ship_id": "船只3-7",
+                "region_id": "3",
+                "position": {
+                    "longitude": 109.18,
+                    "latitude": 19.85
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 28,
+                "ship_id": "船只3-8",
+                "region_id": "3",
+                "position": {
+                    "longitude": 108.82,
+                    "latitude": 19.85
+                },
+                "category": "ship",
+                "confidence": "0.87"
+            },
+            {
+                "id": 29,
+                "ship_id": "船只3-9",
+                "region_id": "3",
+                "position": {
+                    "longitude": 109.08,
+                    "latitude": 19.88
+                },
+                "category": "ship",
+                "confidence": "0.83"
+            },
+            {
+                "id": 30,
+                "ship_id": "船只3-10",
+                "region_id": "3",
+                "position": {
+                    "longitude": 108.91,
+                    "latitude": 19.72
+                },
+                "category": "ship",
+                "confidence": "0.89"
+            },
+            {
+                "id": 31,
+                "ship_id": "船只4-1",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.15,
+                    "latitude": 18.35
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 32,
+                "ship_id": "船只4-2",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.3,
+                    "latitude": 18.4
+                },
+                "category": "ship",
+                "confidence": "0.86"
+            },
+            {
+                "id": 33,
+                "ship_id": "船只4-3",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.05,
+                    "latitude": 18.45
+                },
+                "category": "ship",
+                "confidence": "0.84"
+            },
+            {
+                "id": 34,
+                "ship_id": "船只4-4",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.4,
+                    "latitude": 18.5
+                },
+                "category": "ship",
+                "confidence": "0.87"
+            },
+            {
+                "id": 35,
+                "ship_id": "船只4-5",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.2,
+                    "latitude": 18.55
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 36,
+                "ship_id": "船只4-6",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.1,
+                    "latitude": 18.6
+                },
+                "category": "ship",
+                "confidence": "0.88"
+            },
+            {
+                "id": 37,
+                "ship_id": "船只4-7",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.35,
+                    "latitude": 18.65
+                },
+                "category": "ship",
+                "confidence": "0.83"
+            },
+            {
+                "id": 38,
+                "ship_id": "船只4-8",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.25,
+                    "latitude": 18.38
+                },
+                "category": "ship",
+                "confidence": "0.86"
+            },
+            {
+                "id": 39,
+                "ship_id": "船只4-9",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.15,
+                    "latitude": 18.52
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 40,
+                "ship_id": "船只4-10",
+                "region_id": "4",
+                "position": {
+                    "longitude": 110.45,
+                    "latitude": 18.58
+                },
+                "category": "ship",
+                "confidence": "0.89"
+            }
+        ]
+    },
+    {
+      "id": 1,
+      "status": "success",
+      "sources": {
+        "file_name": "卫星图文件名",
+        "file_format": "tiff",
+        "file_size": 10823780000,
+        "batch_id": "批次标识0001",
+        "timestamp": "2026-02-02T12:00:00Z",
+        "full_extent": {
+          "min_longitude": 108.468064,
+          "max_longitude": 111.049645,
+          "min_latitude": 18.137715,
+          "max_latitude": 20.183882
+        },
+        "resolution": "5",
+        "crs": "WGS84"
+      },
+      "summary": {
+        "total_regions": 2,
+        "processed_regions": 2,
+        "total_ships": 20,
+        "categories_summary": {
+          "ship": 20
+        }
+      },
+      "regions": [
+        {
+          "region_id": "1",
+          "status": "success",
+          "extent": {
+            "min_longitude": 108.772594,
+            "max_longitude": 109.194783,
+            "min_latitude": 19.669851,
+            "max_latitude": 20.10591
+          },
+          "ship_count": "10",
+          "image_path": null
+        },
+        {
+          "region_id": "2",
+          "status": "success",
+          "extent": {
+            "min_longitude": 109.706947,
+            "max_longitude": 110.350612,
+            "min_latitude": 18.111405,
+            "max_latitude": 18.512213
+          },
+          "ship_count": "10",
+          "image_path": null
+        }
+      ],
+      "ships": [
+            {
+                "id": 1,
+                "ship_id": "船只1-1",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.85,
+                    "latitude": 19.8
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 2,
+                "ship_id": "船只1-2",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.9,
+                    "latitude": 19.75
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 3,
+                "ship_id": "船只1-3",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.95,
+                    "latitude": 19.85
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 4,
+                "ship_id": "船只1-4",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.82,
+                    "latitude": 19.9
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 5,
+                "ship_id": "船只1-5",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.88,
+                    "latitude": 19.95
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 6,
+                "ship_id": "船只1-6",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.92,
+                    "latitude": 19.7
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 7,
+                "ship_id": "船只1-7",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.78,
+                    "latitude": 19.8
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 8,
+                "ship_id": "船只1-8",
+                "region_id": "1",
+                "position": {
+                    "longitude": 109.05,
+                    "latitude": 19.9
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 9,
+                "ship_id": "船只1-9",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.98,
+                    "latitude": 19.98
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 10,
+                "ship_id": "船只1-10",
+                "region_id": "1",
+                "position": {
+                    "longitude": 108.87,
+                    "latitude": 20.0
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 11,
+                "ship_id": "船只2-1",
+                "region_id": "2",
+                "position": {
+                    "longitude": 109.85,
+                    "latitude": 18.2
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 12,
+                "ship_id": "船只2-2",
+                "region_id": "2",
+                "position": {
+                    "longitude": 110.0,
+                    "latitude": 18.25
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 13,
+                "ship_id": "船只2-3",
+                "region_id": "2",
+                "position": {
+                    "longitude": 109.9,
+                    "latitude": 18.3
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 14,
+                "ship_id": "船只2-4",
+                "region_id": "2",
+                "position": {
+                    "longitude": 109.75,
+                    "latitude": 18.35
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 15,
+                "ship_id": "船只2-5",
+                "region_id": "2",
+                "position": {
+                    "longitude": 110.1,
+                    "latitude": 18.4
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 16,
+                "ship_id": "船只2-6",
+                "region_id": "2",
+                "position": {
+                    "longitude": 109.8,
+                    "latitude": 18.45
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 17,
+                "ship_id": "船只2-7",
+                "region_id": "2",
+                "position": {
+                    "longitude": 109.95,
+                    "latitude": 18.15
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 18,
+                "ship_id": "船只2-8",
+                "region_id": "2",
+                "position": {
+                    "longitude": 110.2,
+                    "latitude": 18.25
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 19,
+                "ship_id": "船只2-9",
+                "region_id": "2",
+                "position": {
+                    "longitude": 109.7,
+                    "latitude": 18.2
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            },
+            {
+                "id": 20,
+                "ship_id": "船只2-10",
+                "region_id": "2",
+                "position": {
+                    "longitude": 110.05,
+                    "latitude": 18.35
+                },
+                "category": "ship",
+                "confidence": "0.85"
+            }
+        ]
+    }
+]

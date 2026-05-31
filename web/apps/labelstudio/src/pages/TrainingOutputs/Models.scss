@@ -1,0 +1,75 @@
+.modelsContainer {
+  margin-top: 30px;
+  padding: 20px;
+  
+}
+
+.modelsTable {
+  width: 100%;
+  border-collapse: collapse;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  thead {
+    // background-color: #f8f9fa;
+    
+    border-bottom: 1px solid #d0d0d0;
+    // border-top: 1px solid #d0d0d0;
+    font-size: 14px;
+    th {
+      padding: 16px;
+      text-align: left;
+      color: #495057;
+      white-space: nowrap;
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color 0.2s;
+        border-bottom: 1px solid #d0d0d0;
+            font-size: 13px;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+      
+      td {
+        padding: 10px 16px;
+        color: #212529;
+      }
+      
+      &:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+}
+.modelPathCell{
+  display: inline-flex;
+      align-items: center;
+
+}
+.modelCopyIcon {
+  font-size: 17px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+.deleteButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 50px;
+    background-color: #cc5e46;
+    color: #ffffff;
+    border: 1px solid #cc5e46;
+    font-size: 11px;
+    border-radius: 5px;
+    padding: 5px;
+  
+  &:hover {
+    opacity: .95;
+  }
+}

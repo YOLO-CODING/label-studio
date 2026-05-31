@@ -1,0 +1,20 @@
+title: 多边形语义分割标注
+type: community
+group: Computer Vision
+order: 1
+image: /static/templates/semantic-segmentation-with-polygons.png
+details: <h1>绘制物体轮廓多边形</h1>
+config: |
+  <View>
+
+    <Header value="请先选中下方标签，然后点击图片开始绘制多边形"/>
+    <Image name="image" value="$image" zoom="true"/>
+
+    <PolygonLabels name="label" toName="image"
+                   strokeWidth="3" pointSize="small"
+                   opacity="0.9">
+      <Label value="Airplane" alias="飞机" background="red"/>
+      <Label value="Car" alias="汽车" background="blue"/>
+    </PolygonLabels>
+
+  </View>

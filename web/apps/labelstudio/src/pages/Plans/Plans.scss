@@ -1,0 +1,132 @@
+.plansContainer {
+  margin-top: 30px;
+  padding: 20px;
+}
+
+.plansTable {
+  width: 100%;
+  border-collapse: collapse;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  thead {
+    // background-color: #f8f9fa;
+    
+    border-bottom: 1px solid #d0d0d0;
+    // border-top: 1px solid #d0d0d0;
+    font-size: 14px;
+    th {
+      padding: 16px;
+      text-align: left;
+      color: #495057;
+      white-space: nowrap;
+    }
+  }
+  
+  tbody {
+    tr {
+      transition: background-color 0.2s;
+        border-bottom: 1px solid #d0d0d0;
+            font-size: 13px;
+      
+      &:hover {
+        background-color: #f8f9fa;
+      }
+      
+      td {
+        padding: 10px 16px;
+        color: #212529;
+      }
+      
+      &:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+}
+
+.planColumnStatus{
+  font-size: 11px;
+    background: #9a9999;
+    padding: 5px 10px;
+    color: #ffffff;
+    border-radius: 6px;
+    font-weight: 400;
+}
+
+.planViewButton {
+  display: inline-flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 50px;
+    background-color: #ffffff;
+    color: #4c5fa9;
+    border: 1px solid #4c5fa9;
+    font-size: 11px;
+    border-radius: 5px;
+    padding: 5px;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+.confirmButton {
+    color: #fff;
+    width: 50px;
+    font-size: 11px;
+    border-radius: 5px;
+    padding: 5px;
+    background: #4c5fa9;
+        display: inline-flex;
+    align-items: center;
+    justify-content: space-around;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+.cancelButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 50px;
+    background-color: #6c757d;
+    color: #ffffff;
+    border: 1px solid #6c757d;
+    font-size: 11px;
+    border-radius: 5px;
+    padding: 5px;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+.deleteButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 50px;
+    background-color: #cc5e46;
+    color: #ffffff;
+    border: 1px solid #cc5e46;
+    font-size: 11px;
+    border-radius: 5px;
+    padding: 5px;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+// 添加响应式样式
+@media (max-width: 768px) {
+  .plan-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

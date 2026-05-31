@@ -1,0 +1,118 @@
+.breadcrumbs {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+
+  &__label {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  &__beta {
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    color: var(--plum_0);
+    padding: 2px 8px;
+    background-color: var(--plum_500);
+    border-radius: 12px;
+  }
+
+  &__list {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__item {
+    font-size: 14px;
+    line-height: 22px;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    cursor: default;
+
+    &:not(.breadcrumbs__item_last) {
+      cursor: pointer;
+
+      & > span,
+      & > a {
+        // color: var(--color-neutral-content-subtler);
+        color: #eee;
+        font-weight: 300;
+        font-size: 13px;
+
+        &:hover {
+          color: #fff;
+          // color: var(--color-primary-content-hover);
+        }
+      }
+    }
+
+    &:not(:nth-child(2)) {
+      flex-shrink: 0;
+    }
+
+    &:nth-child(2) span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &:only-child {
+      pointer-events: none;
+    }
+  }
+
+  &__item > span,
+  &__item > a {
+    text-decoration: none;
+    // color: var(--color-neutral-content);
+    color: #ddd;
+    font-weight: 300;
+    font-size: 13px;
+
+    a {
+      // color: var(--color-primary-content);
+      color: #fff;
+      font-weight: 300;
+      font-size: 13px;
+    }
+  }
+
+  &__item + &__item {
+    margin-left: 30px;
+  }
+
+  &__item + &__item::before {
+    top: 54%;
+    right: 109%;
+     content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 1024'%3E%3Cpath d='M350.72 168.170667a32 32 0 0 1 42.965333-2.069334l2.282667 2.069334 331.861333 331.861333a32 32 0 0 1 2.069334 42.986667l-2.069334 2.282666-331.861333 331.861334a32 32 0 0 1-47.338667-42.965334l2.069334-2.282666L659.946667 522.666667 350.698667 213.418667a32 32 0 0 1-2.069334-42.965334l2.069334-2.282666z' fill='%23999'/%3E%3C/svg%3E");
+    width: 14px;
+    display: inline;
+    color: var(--color-neutral-content-subtlest);
+    position: absolute;
+    transform: translate3d(0, -50%, 0);
+  }
+
+  &__settings {
+    width: 20px;
+    height: 20px;
+    display: block;
+    margin-left: 10px;
+  }
+
+  &__settings img {
+    display: block;
+    opacity: 0.23;
+  }
+}

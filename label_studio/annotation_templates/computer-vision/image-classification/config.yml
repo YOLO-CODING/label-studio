@@ -1,0 +1,28 @@
+# title: Image Classification
+# type: community
+# group: Computer Vision
+# image: /static/templates/image-classification.png
+# details: <h1>Classify the image</h1>
+# config: |
+#   <View>
+#     <Image name="image" value="$image"/>
+#     <Choices name="choice" toName="image">
+#       <Choice value="Adult content"/>
+#       <Choice value="Weapons" />
+#       <Choice value="Violence" />
+#     </Choices>
+#   </View>
+title: 图片分类标注
+type: community
+group: Computer Vision
+image: /static/templates/image-classification.png
+details: <h1>对图片进行分类标注</h1>
+config: |
+  <View>
+    <Image name="image" value="$image"/>
+    <Choices name="choice" toName="image">
+      <Choice value="Adult content"/>
+      <Choice value="Weapons" />
+      <Choice value="Violence" />
+    </Choices>
+  </View>

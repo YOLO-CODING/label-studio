@@ -1,0 +1,92 @@
+.main-title {
+  text-align:center;
+  margin-top: 8%;
+  font-size: 40px;
+  font-weight: 800;
+}
+.main-button-group {
+  text-align:center;
+  display: flex;
+  justify-content: end;
+  width: 48%;
+  margin: 30px auto 0;
+}
+.main-desc-warp {
+  display: flex;
+  justify-content: center;
+
+  &__info-pannel {
+    position: relative;
+    z-index: 9;
+    background: rgb(255 255 255 / 17%);
+    padding: 29px;
+    border-radius: 3px;
+    margin-left: 25%;
+  }
+
+  &__feature-item {
+    width: 650px;
+    margin-top: 12px;
+    will-change: transform;
+    backface-visibility: hidden;
+    animation: slideUp .5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(100px) translateZ(0);
+
+    &:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    &:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.5s;
+    }
+
+    & h3 {
+      font-size: 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+    }
+
+    & p {
+      font-size: 16px;
+      font-weight: 100;
+    }
+
+    & span {
+      margin-left: 8px;
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+  }
+}
+
+.main-foot {
+  font-size: 12px;
+  margin: 0;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-top: 1px solid #d7d7d7;
+  padding: 8px 13px;
+  font-style: italic;
+  color: #888;
+  & b {
+    font-style: normal;
+    margin-left: 5px; 
+
+  }
+}
+

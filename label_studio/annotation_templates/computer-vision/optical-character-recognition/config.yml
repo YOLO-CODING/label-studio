@@ -1,0 +1,55 @@
+# title: Optical Character Recognition
+# type: community
+# group: Computer Vision
+# image: /static/templates/optical-character-recognition.png
+# details: <h1>Draw a bounding box or polygon around region and write down the text found inside</h1>
+# config: |
+#   <View>
+#     <Image name="image" value="$ocr"/>
+
+#     <Labels name="label" toName="image">
+#       <Label value="Text" background="green"/>
+#       <Label value="Handwriting" background="blue"/>
+#     </Labels>
+
+#     <Rectangle name="bbox" toName="image" strokeWidth="3"/>
+#     <Polygon name="poly" toName="image" strokeWidth="3"/>
+
+#     <TextArea name="transcription" toName="image"
+#               editable="true"
+#               perRegion="true"
+#               required="true"
+#               maxSubmissions="1"
+#               rows="5"
+#               placeholder="Recognized Text"
+#               displayMode="region-list"
+#               />
+#   </View>
+
+title: 光学字符识别（OCR）
+type: community
+group: Computer Vision
+image: /static/templates/optical-character-recognition.png
+details: <h1>在文字区域绘制矩形框或多边形，并输入识别到的文本</h1>
+config: |
+  <View>
+    <Image name="image" value="$ocr"/>
+
+    <Labels name="label" toName="image">
+      <Label value="Text" background="green"/>
+      <Label value="Handwriting" background="blue"/>
+    </Labels>
+
+    <Rectangle name="bbox" toName="image" strokeWidth="3"/>
+    <Polygon name="poly" toName="image" strokeWidth="3"/>
+
+    <TextArea name="transcription" toName="image"
+              editable="true"
+              perRegion="true"
+              required="true"
+              maxSubmissions="1"
+              rows="5"
+              placeholder="识别出的文本"
+              displayMode="region-list"
+              />
+  </View>

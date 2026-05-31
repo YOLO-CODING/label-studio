@@ -1,0 +1,12 @@
+title: 图片描述生成
+type: community
+group: 计算机视觉 
+image: /static/templates/image-captioning.png
+details: <h1>为图片生成描述文本</h1>
+config: |
+  <View>
+    <Image name="image" value="$captioning"/>
+    <Header value="请描述这张图片：" />
+    <TextArea name="caption" toName="image" placeholder="请输入图片描述..."
+              rows="5" maxSubmissions="1"/>
+  </View>

@@ -1,0 +1,29 @@
+# title: Object Detection with Bounding Boxes
+# type: community
+# group: Computer Vision
+# order: 3
+# image: /static/templates/object-detection-with-bounding-boxes.png
+# details: <h1>Draw a bounding box around the object</h1>
+# config: |
+#   <View>
+#     <Image name="image" value="$image"/>
+#     <RectangleLabels name="label" toName="image">
+#       <Label value="Airplane" background="green"/>
+#       <Label value="Car" background="blue"/>
+#     </RectangleLabels>
+#   </View>
+
+title: 目标检测与边界框标注
+type: community
+group: Computer Vision
+order: 3
+image: /static/templates/object-detection-with-bounding-boxes.png
+details: <h1>在物体周围绘制矩形框</h1>
+config: |
+  <View>
+    <Image name="image" value="$image"/>
+    <RectangleLabels name="label" toName="image">
+      <Label value="Airplane" alias="飞机" background="green"/>
+      <Label value="Car" alias="汽车" background="blue"/>
+    </RectangleLabels>
+  </View>
