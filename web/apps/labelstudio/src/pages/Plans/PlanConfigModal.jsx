@@ -2,28 +2,38 @@ import { Modal } from "../../components/Modal/ModalPopup";
 import { useAPI } from "../../providers/ApiProvider";
 import { Button } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
-import { useRef,useCallback, useEffect, useState, useContext } from "react";
-import { Input, Label } from "../../components/Form";
+import { useRef, useEffect, useState, useContext } from "react";
+import { Input, Label, Select } from "../../components/Form";
 import { Space } from "../../components/Space/Space";
 import { ToastContext } from "@humansignal/ui";
 
-export default function PlanConfigModal({
-  opened,
-  onOpened,
-  onClosed,
-  onSaved,
-  plan,
-  mode
-}) {
+export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, plan, mode }) {
   const modalRef = useRef(null);
   const [epochs, setEpochs] = useState(plan.epochs || 100);
   const [imageSize, setImageSize] = useState(plan.imgsz || 640);
   const [planId, setPlanId] = useState(plan.id);
-  const configMode = mode || '';
-  const title = (configMode == 'confirm') ? "确认" : "配置";
+
+  const parseExtraConfig = () => {
+    try {
+      return JSON.parse(plan.training_config || "{}");
+    } catch {
+      return {};
+    }
+  };
+
+  const initialExtraConfig = parseExtraConfig();
+  const [model, setModel] = useState(initialExtraConfig.model || "yolov8n");
+  const [batchSize, setBatchSize] = useState(initialExtraConfig.batch_size || 16);
+  const [lr, setLr] = useState(initialExtraConfig.lr || 0.01);
+  const [optimizer, setOptimizer] = useState(initialExtraConfig.optimizer || "SGD");
+  const [patience, setPatience] = useState(initialExtraConfig.patience || 50);
+  const [weightDecay, setWeightDecay] = useState(initialExtraConfig.weight_decay || 0.0005);
+
+  const configMode = mode || "";
+  const title = configMode === "confirm" ? "确认" : "配置";
 
   const latestState = useRef();
-  latestState.current = { epochs, imageSize, planId };
+  latestState.current = { epochs, imageSize, planId, model, batchSize, lr, optimizer, patience, weightDecay };
 
   const api = useAPI();
   const toast = useContext(ToastContext);
@@ -38,14 +48,58 @@ export default function PlanConfigModal({
 
   const handleEpochsChange = (e) => {
     const value = e.target.value;
-    const numValue = parseInt(value, 10);
-    setEpochs(isNaN(numValue) ? '' : numValue);
+    const numValue = Number.parseInt(value, 10);
+    setEpochs(isNaN(numValue) ? "" : numValue);
   };
 
   const handleImageSizeChange = (e) => {
     const value = e.target.value;
-    const numValue = parseInt(value, 10);
-    setImageSize(isNaN(numValue) ? '' : numValue);
+    const numValue = Number.parseInt(value, 10);
+    setImageSize(isNaN(numValue) ? "" : numValue);
+  };
+
+  const handleModelChange = (value) => {
+    setModel(value);
+  };
+
+  const handleBatchSizeChange = (e) => {
+    const value = e.target.value;
+    const numValue = Number.parseInt(value, 10);
+    setBatchSize(isNaN(numValue) ? "" : numValue);
+  };
+
+  const handleLrChange = (e) => {
+    const value = e.target.value;
+    const numValue = Number.parseFloat(value);
+    setLr(isNaN(numValue) ? "" : numValue);
+  };
+
+  const handleOptimizerChange = (value) => {
+    setOptimizer(value);
+  };
+
+  const handlePatienceChange = (e) => {
+    const value = e.target.value;
+    const numValue = Number.parseInt(value, 10);
+    setPatience(isNaN(numValue) ? "" : numValue);
+  };
+
+  const handleWeightDecayChange = (e) => {
+    const value = e.target.value;
+    const numValue = Number.parseFloat(value);
+    setWeightDecay(isNaN(numValue) ? "" : numValue);
+  };
+
+  const buildExtraConfig = () => {
+    const { model, batchSize, lr, optimizer, patience, weightDecay } = latestState.current;
+    return JSON.stringify({
+      model: model || "yolov8n",
+      batch_size: batchSize || 16,
+      lr: lr || 0.01,
+      optimizer: optimizer || "SGD",
+      patience: patience || 50,
+      weight_decay: weightDecay || 0.0005,
+    });
   };
 
   const saveConfirm = async () => {
@@ -54,31 +108,30 @@ export default function PlanConfigModal({
     const configData = {
       epochs: epochs || 10,
       imgsz: imageSize || 224,
-      id: planId
+      id: planId,
+      training_config: buildExtraConfig(),
     };
 
     const response = await api.callApi("confirmPlan", {
-        params: {
-          pk: plan.id
-        },
-        body: configData
+      params: {
+        pk: plan.id,
+      },
+      body: configData,
     });
     if (response) {
       if (response.id) {
-        // success
         toast.show({ message: "训练计划已确认", type: "info" });
 
         modalRef.current?.hide?.();
-    
+
         if (onSaved) {
           onSaved();
         }
-      }
-      else {
-          toast.show({ message: "训练计划确认失败：" + (response.error||''), type: "error" });
+      } else {
+        toast.show({ message: `训练计划确认失败：${response.error || ""}`, type: "error" });
       }
     }
-  }
+  };
 
   const saveEdit = async () => {
     const { epochs, imageSize, planId } = latestState.current;
@@ -86,40 +139,38 @@ export default function PlanConfigModal({
     const configData = {
       epochs: epochs || 10,
       imgsz: imageSize || 224,
-      id: planId
+      id: planId,
+      training_config: buildExtraConfig(),
     };
 
     const response = await api.callApi("editPlan", {
-        params: {
-          pk: plan.id
-        },
-        body: configData
+      params: {
+        pk: plan.id,
+      },
+      body: configData,
     });
     if (response) {
       if (response.id) {
-        // success
         toast.show({ message: "训练计划已更新", type: "info" });
 
         modalRef.current?.hide?.();
-    
+
         if (onSaved) {
           onSaved();
         }
-      }
-      else {
-          toast.show({ message: "训练计划更新失败：" + (response.error||''), type: "error" });
+      } else {
+        toast.show({ message: `训练计划更新失败：${response.error || ""}`, type: "error" });
       }
     }
-  }
+  };
 
   const save = async () => {
-    if (configMode == 'confirm') {
+    if (configMode === "confirm") {
       saveConfirm();
-    }
-    else {
+    } else {
       saveEdit();
     }
-  }
+  };
 
   return (
     <Modal
@@ -129,26 +180,29 @@ export default function PlanConfigModal({
       title={title}
       body={
         <Block name="plan-config-modal">
-
-          { configMode == 'confirm' && (
+          {configMode === "confirm" && (
             <Elem name="warp">
-              <Space style={{fontSize: 20, marginBottom: 20, lineHeight: 1.5}}>确认后训练任务将立即开始，可以在计划详情页面查看训练进度和日志。<br/>请确认是否提交训练计划? </Space>
-              <Space style={{fontSize: 18, marginBottom: 10}}>请检查下面的训练参数：</Space>
+              <Space style={{ fontSize: 20, marginBottom: 20, lineHeight: 1.5 }}>
+                确认后训练任务将立即开始，可以在计划详情页面查看训练进度和日志。
+                <br />
+                请确认是否提交训练计划?{" "}
+              </Space>
+              <Space style={{ fontSize: 18, marginBottom: 10 }}>请检查下面的训练参数：</Space>
             </Elem>
           )}
-          { (configMode == 'edit' || !mode) && (
+          {(configMode === "edit" || !mode) && (
             <Elem name="warp">
-              <Space style={{fontSize: 20, marginBottom: 10, lineHeight: 1.5}}>修改训练参数： </Space>
+              <Space style={{ fontSize: 20, marginBottom: 10, lineHeight: 1.5 }}>修改训练参数： </Space>
             </Elem>
           )}
 
-          <Elem name="warp" style={{padding: 10}}>
+          <Elem name="warp" style={{ padding: 10 }}>
             <Block name="settings-column">
               <Label text="训练轮数" size="medium" />
               <Input
                 name="epochs"
                 type="number"
-                defaultValue={epochs || ''}
+                defaultValue={epochs || ""}
                 onChange={handleEpochsChange}
                 min="1"
                 placeholder="请输入训练轮数"
@@ -159,38 +213,110 @@ export default function PlanConfigModal({
               <Input
                 name="imageSize"
                 type="number"
-                defaultValue={imageSize || ''}
+                defaultValue={imageSize || ""}
                 onChange={handleImageSizeChange}
                 min="32"
                 placeholder="请输入图像尺寸"
               />
-              <Space style={{display: 'inline', marginLeft: 10}}>范围：320 - 1280， 必需是32的倍数</Space>
+              <Space style={{ display: "inline", marginLeft: 10 }}>范围：320 - 1280， 必需是32的倍数</Space>
+            </Block>
+            <Block name="settings-column">
+              <Label text="YOLO 模型" size="medium" />
+              <Select
+                name="model"
+                options={[
+                  { value: "yolov8n", label: "YOLOv8n (nano)" },
+                  { value: "yolov8s", label: "YOLOv8s (small)" },
+                  { value: "yolov8m", label: "YOLOv8m (medium)" },
+                  { value: "yolov8l", label: "YOLOv8l (large)" },
+                  { value: "yolov8x", label: "YOLOv8x (xlarge)" },
+                ]}
+                value={model}
+                onChange={handleModelChange}
+              />
+            </Block>
+            <Block name="settings-column">
+              <Label text="批次大小" />
+              <Input
+                name="batchSize"
+                type="number"
+                defaultValue={batchSize || ""}
+                onChange={handleBatchSizeChange}
+                min="1"
+                placeholder="请输入批次大小"
+              />
+            </Block>
+            <Block name="settings-column">
+              <Label text="学习率" />
+              <Input
+                name="lr"
+                type="number"
+                step="0.0001"
+                defaultValue={lr || ""}
+                onChange={handleLrChange}
+                min="0"
+                placeholder="请输入学习率"
+              />
+            </Block>
+            <Block name="settings-column">
+              <Label text="优化器" size="medium" />
+              <Select
+                name="optimizer"
+                options={[
+                  { value: "SGD", label: "SGD" },
+                  { value: "Adam", label: "Adam" },
+                  { value: "AdamW", label: "AdamW" },
+                ]}
+                value={optimizer}
+                onChange={handleOptimizerChange}
+              />
+            </Block>
+            <Block name="settings-column">
+              <Label text="早停轮数" />
+              <Input
+                name="patience"
+                type="number"
+                defaultValue={patience || ""}
+                onChange={handlePatienceChange}
+                min="1"
+                placeholder="请输入早停轮数"
+              />
+            </Block>
+            <Block name="settings-column">
+              <Label text="权重衰减" />
+              <Input
+                name="weightDecay"
+                type="number"
+                step="0.0001"
+                defaultValue={weightDecay || ""}
+                onChange={handleWeightDecayChange}
+                min="0"
+                placeholder="请输入权重衰减"
+              />
             </Block>
           </Elem>
         </Block>
       }
       footer={
-        <div style={{position: 'relative', fontSize: 16}}>
-          <div style={{display: 'inline-block', margin: '0 20px'}}>
+        <div style={{ position: "relative", fontSize: 16 }}>
+          <div style={{ display: "inline-block", margin: "0 20px" }}>
             <Button
-              style={{backgroundColor: '#ffffff', color: '#4c5fa9'}}
-              onClick={() => { modalRef.current?.hide();}}
+              style={{ backgroundColor: "#ffffff", color: "#4c5fa9" }}
+              onClick={() => {
+                modalRef.current?.hide();
+              }}
             >
               取消
             </Button>
           </div>
-          <div style={{display: 'inline-block', margin: '0 20px'}}>
-            <Button
-              onClick={save}
-              disabled={!epochs || !imageSize}
-            >
+          <div style={{ display: "inline-block", margin: "0 20px" }}>
+            <Button onClick={save} disabled={!epochs || !imageSize || !model}>
               确定
             </Button>
           </div>
-          
         </div>
       }
-      style={{ width: 750, height: 400 }}
+      style={{ width: 750 }}
       onHide={onClosed}
       onShow={onOpened}
     />
