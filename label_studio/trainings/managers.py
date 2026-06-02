@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import platform
@@ -70,9 +71,16 @@ class YoloTrainingManager(object):
             self.batch_no = plan.batch_last
         else:
             self.batch_no = 1
-        self.training_device = settings.YOLO_TRAIN_DEVICE
-        self.training_batch = settings.YOLO_TRAIN_BATCH
-        self.training_optimizer = settings.YOLO_TRAIN_OPTIMIZER
+
+        self.training_config = self._parse_training_config(plan)
+
+        self.training_device = self.training_config.get('device', settings.YOLO_TRAIN_DEVICE)
+        self.training_batch = self.training_config.get('batch_size', settings.YOLO_TRAIN_BATCH)
+        self.training_optimizer = self.training_config.get('optimizer', settings.YOLO_TRAIN_OPTIMIZER)
+        self.training_lr = self.training_config.get('lr', 0.01)
+        self.training_patience = self.training_config.get('patience', 50)
+        self.training_weight_decay = self.training_config.get('weight_decay', 0.0005)
+
         self.project_train = "output_train"
         self.project_val = "output_val"
         self.failed = False
@@ -82,6 +90,12 @@ class YoloTrainingManager(object):
         self.log_file_handler = logging.FileHandler(self.train_log_file)
         self.log_file_handler.setLevel(logging.DEBUG)
         self.log_file_handler.setFormatter(PrefixFormatter("%(message)s"))
+
+    def _parse_training_config(self, plan):
+        try:
+            return json.loads(plan.training_config or '{}')
+        except Exception:
+            return {}
 
     def is_failed(self):
         return self.failed
@@ -121,6 +135,9 @@ class YoloTrainingManager(object):
                             device=self.training_device,
                             batch=self.training_batch,
                             optimizer=self.training_optimizer,
+                            lr0=self.training_lr,
+                            patience=self.training_patience,
+                            weight_decay=self.training_weight_decay,
                             project=self.project_train,
                             name=epoch_name,
                             exist_ok=True)
@@ -190,6 +207,9 @@ class YoloTrainingManager(object):
                             device=self.training_device,
                             batch=self.training_batch,
                             optimizer=self.training_optimizer,
+                            lr0=self.training_lr,
+                            patience=self.training_patience,
+                            weight_decay=self.training_weight_decay,
                             project=self.project_train,
                             name=epoch_name,
                             exist_ok=True)
