@@ -104,6 +104,7 @@ class Plan (PlanMixin, models.Model):
     target_platform = models.CharField(_('target_platform'), max_length=255, null=True)
     epochs = models.IntegerField(_('epochs'), default=100)
     imgsz = models.IntegerField(_('imgsz'), null=False, default=608)
+    training_config = models.CharField(_('training_config'), max_length=10000, null=True, blank=True)
     cancelled = models.BooleanField(_('cancelled'), default=False)
     cancelled_at = models.DateTimeField(_('cancelled at'), null=True, blank=True)
     started_at = models.DateTimeField(_('started at'), null=True)
