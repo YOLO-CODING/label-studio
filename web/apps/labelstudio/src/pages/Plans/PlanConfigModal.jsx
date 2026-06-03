@@ -41,8 +41,6 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
   useEffect(() => {
     if (modalRef.current && opened) {
       modalRef.current?.show?.();
-    } else if (modalRef.current && modalRef.current.visible) {
-      modalRef.current?.hide?.();
     }
   }, [opened]);
 
