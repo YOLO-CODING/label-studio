@@ -154,6 +154,9 @@ class YoloDatasetGenerator:
                     self.fail_message = "解析Task文件异常：" + str(e)
                     logger.error("failed to write " + file.name + ": " + str(e))
                     return
+        
+        # Ensure val and test directories have data by copying from train if empty
+        self._ensure_val_test_data()
         try:
             # classes.txt
             classes_txt_path = os.path.join(self.dataset_dir, "classes.txt")
@@ -175,6 +178,76 @@ class YoloDatasetGenerator:
         finally:
             if self.log_file_handler:
                 logger.removeHandler(self.log_file_handler)
+
+    def _ensure_val_test_data(self):
+        """
+        确保 train、val 和 test 目录都有数据。
+        如果某个目录为空，则从其他有数据的目录复制。
+        """
+        train_images = os.listdir(self.images_dir_map["train"])
+        train_labels = os.listdir(self.labels_dir_map["train"])
+        val_images = os.listdir(self.images_dir_map["val"])
+        val_labels = os.listdir(self.labels_dir_map["val"])
+        test_images = os.listdir(self.images_dir_map["test"])
+        test_labels = os.listdir(self.labels_dir_map["test"])
+        
+        # Determine which set has the source data
+        source = None
+        source_images_dir = None
+        source_labels_dir = None
+        source_images = []
+        source_labels = []
+        
+        if train_images:
+            source = "train"
+            source_images_dir = self.images_dir_map["train"]
+            source_labels_dir = self.labels_dir_map["train"]
+            source_images = train_images
+            source_labels = train_labels
+        elif val_images:
+            source = "val"
+            source_images_dir = self.images_dir_map["val"]
+            source_labels_dir = self.labels_dir_map["val"]
+            source_images = val_images
+            source_labels = val_labels
+        elif test_images:
+            source = "test"
+            source_images_dir = self.images_dir_map["test"]
+            source_labels_dir = self.labels_dir_map["test"]
+            source_images = test_images
+            source_labels = test_labels
+        
+        if source is None:
+            self.failed = True
+            self.fail_message = "所有数据集均为空，无法生成训练数据"
+            return
+        
+        logger.info(f"数据源: {source}, 共 {len(source_images)} 个文件")
+        
+        # Fill train from source if empty
+        if not train_images and source != "train":
+            logger.info("训练集为空，从 {} 复制数据...".format(source))
+            self._copy_files(source_images_dir, self.images_dir_map["train"], source_images)
+            self._copy_files(source_labels_dir, self.labels_dir_map["train"], source_labels)
+            train_images = source_images[:]
+            train_labels = source_labels[:]
+        
+        # Fill val from train if empty
+        if not val_images:
+            logger.info("验证集为空，从训练集复制数据...")
+            self._copy_files(self.images_dir_map["train"], self.images_dir_map["val"], train_images)
+            self._copy_files(self.labels_dir_map["train"], self.labels_dir_map["val"], train_labels)
+        
+        # Fill test from train if empty
+        if not test_images:
+            logger.info("测试集为空，从训练集复制数据...")
+            self._copy_files(self.images_dir_map["train"], self.images_dir_map["test"], train_images)
+            self._copy_files(self.labels_dir_map["train"], self.labels_dir_map["test"], train_labels)
+    
+    @staticmethod
+    def _copy_files(src_dir, dst_dir, files):
+        for f in files:
+            shutil.copy2(os.path.join(src_dir, f), os.path.join(dst_dir, f))
 
     def generate_classes_file(self, file_path):
         with open(file_path, 'w') as f:

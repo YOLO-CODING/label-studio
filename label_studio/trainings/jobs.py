@@ -4,6 +4,8 @@ import os
 import logging
 import shutil
 import time
+import subprocess
+import sys
 
 import django_rq
 import rq
@@ -21,7 +23,37 @@ from plans.models import (
     TrainingModels
 )
 
-from trainings.managers import YoloTrainingManager
+def run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_count, last_weight=None, epoch_start=0):
+    """Run YOLO training in a completely separate process to avoid macOS fork segfault"""
+    env = os.environ.copy()
+    env['PYTHONUNBUFFERED'] = '1'
+    env['OMP_NUM_THREADS'] = '1'
+    env['MKL_NUM_THREADS'] = '1'
+    env['OPENBLAS_NUM_THREADS'] = '1'
+    env['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+    env['CUDA_VISIBLE_DEVICES'] = ''
+    env['PYTORCH_MPS_DISABLE'] = '1'
+    env['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = 'YES'
+    env['DJANGO_SETTINGS_MODULE'] = 'core.settings.label_studio'
+    env['DJANGO_DB'] = 'sqlite'
+    
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    script_path = os.path.join(base_dir, 'trainings', 'yolo_train_standalone.py')
+    
+    cmd = [
+        sys.executable, script_path,
+        str(plan_id),
+        label_type,
+        working_dir,
+        dataset_entry,
+        str(epoch_count),
+        last_weight or "None",
+        str(epoch_start)
+    ]
+    
+    logging.info(f"Running YOLO training subprocess: {' '.join(cmd)}")
+    result = subprocess.run(cmd, env=env, cwd=base_dir, capture_output=False)
+    return result.returncode == 0
 
 def failure_handler(job, exc_type, exc_value, traceback):
     # 自定义失败处理逻辑
@@ -107,18 +139,25 @@ def do_training_first_epochs(plan_id, label_type, working_dir, dataset_entry, ep
             logging.info("Plan %s is already failed", plan_id)
             return
 
-        m = YoloTrainingManager(label_type=label_type, working_dir=working_dir, dataset_entry=dataset_entry, last_weight=None, imgsz=plan.imgsz, plan=plan)
-        m.do_training_first(epoch_count)
+        # Use subprocess to avoid macOS fork segfault with PyTorch
+        success = run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_count, None)
+        
+        # Read best_weight from temp file
+        best_weight = None
+        weight_file = os.path.join(working_dir, ".best_weight.txt")
+        if os.path.exists(weight_file):
+            with open(weight_file, "r") as f:
+                best_weight = f.read().strip() or None
 
-        if m.is_failed():
+        if not success or not best_weight:
             plan.failed = True
-            plan.fail_message = m.get_fail_message()
+            plan.fail_message = "YOLO training subprocess failed"
             plan.status = Plan.STATUS_FAILED
             plan.save()
 
             PlanRecords.objects.create(
                 plan=plan,
-                content="第1-" + str(epoch_count) + "轮训练失败:" + m.get_fail_message(),
+                content="第1-" + str(epoch_count) + "轮训练失败",
                 platform="本地"
             )
             return
@@ -132,9 +171,9 @@ def do_training_first_epochs(plan_id, label_type, working_dir, dataset_entry, ep
         queue = django_rq.get_queue('q_trainings')
         if epoch_end < plan.epochs:
             next_count = min(plan.epochs - epoch_end, 10)
-            queue.enqueue(do_training_epochs, plan_id, label_type, working_dir, dataset_entry, epoch_end, next_count, m.get_best_weight(), on_failure=failure_handler)
+            queue.enqueue(do_training_epochs, plan_id, label_type, working_dir, dataset_entry, epoch_end, next_count, best_weight, on_failure=failure_handler)
         else:
-            queue.enqueue(finish_training, plan_id, label_type, working_dir, dataset_entry, epoch_end, m.get_best_weight(), on_failure=failure_handler)
+            queue.enqueue(finish_training, plan_id, label_type, working_dir, dataset_entry, epoch_end, best_weight, on_failure=failure_handler)
     except Exception as ex:
         logging.error("Training failed for plan: %s with type: %s", plan_id, label_type)
 
@@ -151,19 +190,25 @@ def do_training_epochs(plan_id, label_type, working_dir, dataset_entry, epoch_st
             logging.info("Plan %s is already failed", plan_id)
             return
 
-        m = YoloTrainingManager(label_type=label_type, working_dir=working_dir, dataset_entry=dataset_entry,
-                                last_weight=last_weight, imgsz=plan.imgsz, plan=plan)
-        m.do_training_epoch(epoch_start, epoch_count)
+        # Use subprocess to avoid macOS fork segfault with PyTorch
+        success = run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_count, last_weight, epoch_start)
+        
+        # Read best_weight from temp file
+        best_weight = None
+        weight_file = os.path.join(working_dir, ".best_weight.txt")
+        if os.path.exists(weight_file):
+            with open(weight_file, "r") as f:
+                best_weight = f.read().strip() or None
 
-        if m.is_failed():
+        if not success or not best_weight:
             plan.failed = True
-            plan.fail_message = m.get_fail_message()
+            plan.fail_message = "YOLO training subprocess failed"
             plan.status = Plan.STATUS_FAILED
             plan.save()
 
             PlanRecords.objects.create(
                 plan=plan,
-                content="第" + str(epoch_start + 1) + "-" + str(epoch_start + epoch_count) + "轮训练失败:" + m.get_fail_message(),
+                content="第" + str(epoch_start + 1) + "-" + str(epoch_start + epoch_count) + "轮训练失败",
                 platform="本地"
             )
             return
@@ -177,9 +222,9 @@ def do_training_epochs(plan_id, label_type, working_dir, dataset_entry, epoch_st
         epoch_end = epoch_start + epoch_count
         if epoch_end < plan.epochs:
             next_count = min(plan.epochs - epoch_end, 10)
-            queue.enqueue(do_training_epochs, plan_id, label_type, working_dir, dataset_entry, epoch_end, next_count, m.get_best_weight(), on_failure=failure_handler)
+            queue.enqueue(do_training_epochs, plan_id, label_type, working_dir, dataset_entry, epoch_end, next_count, best_weight, on_failure=failure_handler)
         else:
-            queue.enqueue(finish_training, plan_id, label_type, working_dir, dataset_entry, epoch_end, m.get_best_weight(), on_failure=failure_handler)
+            queue.enqueue(finish_training, plan_id, label_type, working_dir, dataset_entry, epoch_end, best_weight, on_failure=failure_handler)
     except Exception as ex:
         logging.error("Training failed for plan: %s with type: %s", plan_id, label_type)
 

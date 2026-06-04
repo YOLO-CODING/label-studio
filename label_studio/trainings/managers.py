@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import platform
@@ -70,11 +71,18 @@ class YoloTrainingManager(object):
             self.batch_no = plan.batch_last
         else:
             self.batch_no = 1
-        self.training_device = settings.YOLO_TRAIN_DEVICE
-        self.training_batch = settings.YOLO_TRAIN_BATCH
-        self.training_optimizer = settings.YOLO_TRAIN_OPTIMIZER
-        self.project_train = "output_train"
-        self.project_val = "output_val"
+
+        self.training_config = self._parse_training_config(plan)
+
+        self.training_device = self.training_config.get('device', settings.YOLO_TRAIN_DEVICE)
+        self.training_batch = self.training_config.get('batch_size', settings.YOLO_TRAIN_BATCH)
+        self.training_optimizer = self.training_config.get('optimizer', settings.YOLO_TRAIN_OPTIMIZER)
+        self.training_lr = self.training_config.get('lr', 0.01)
+        self.training_patience = self.training_config.get('patience', 50)
+        self.training_weight_decay = self.training_config.get('weight_decay', 0.0005)
+
+        self.project_train = os.path.join(working_dir, "output_train")
+        self.project_val = os.path.join(working_dir, "output_val")
         self.failed = False
         self.fail_message = None
         self.best_weight = None
@@ -82,6 +90,12 @@ class YoloTrainingManager(object):
         self.log_file_handler = logging.FileHandler(self.train_log_file)
         self.log_file_handler.setLevel(logging.DEBUG)
         self.log_file_handler.setFormatter(PrefixFormatter("%(message)s"))
+
+    def _parse_training_config(self, plan):
+        try:
+            return json.loads(plan.training_config or '{}')
+        except Exception:
+            return {}
 
     def is_failed(self):
         return self.failed
@@ -121,6 +135,9 @@ class YoloTrainingManager(object):
                             device=self.training_device,
                             batch=self.training_batch,
                             optimizer=self.training_optimizer,
+                            lr0=self.training_lr,
+                            patience=self.training_patience,
+                            weight_decay=self.training_weight_decay,
                             project=self.project_train,
                             name=epoch_name,
                             exist_ok=True)
@@ -136,12 +153,67 @@ class YoloTrainingManager(object):
 
             self.best_weight = weight_file
 
+            # Find results.csv - YOLO may save it in different locations
             result_csv = os.path.join(epoch_dir, "results.csv")
+            if not os.path.exists(result_csv):
+                # Try alternative path (YOLO may save to home directory or other locations)
+                alt_epoch_dir = os.path.join(os.path.expanduser("~"), "runs", model.task, self.project_train, epoch_name)
+                result_csv = os.path.join(alt_epoch_dir, "results.csv")
+                logging.info(f"Looking for results.csv at: {result_csv}")
+            
+            if not os.path.exists(result_csv):
+                # Try to find any results.csv in runs directory
+                runs_dir = os.path.join(os.path.expanduser("~"), "runs", model.task, self.project_train)
+                if os.path.exists(runs_dir):
+                    for root, dirs, files in os.walk(runs_dir):
+                        if "results.csv" in files:
+                            result_csv = os.path.join(root, "results.csv")
+                            logging.info(f"Found results.csv at: {result_csv}")
+                            break
+            
+            if not os.path.exists(result_csv):
+                # Try Documents directory (macOS)
+                docs_runs = os.path.join(os.path.expanduser("~/Documents"), "runs", model.task, self.project_train)
+                if os.path.exists(docs_runs):
+                    for root, dirs, files in os.walk(docs_runs):
+                        if "results.csv" in files:
+                            result_csv = os.path.join(root, "results.csv")
+                            logging.info(f"Found results.csv in Documents at: {result_csv}")
+                            break
+            
+            if not os.path.exists(result_csv):
+                # Broad search in common locations
+                for search_base in [os.path.expanduser("~"), os.path.expanduser("~/Documents"), "/tmp"]:
+                    if os.path.exists(search_base):
+                        for root, dirs, files in os.walk(search_base):
+                            # Skip hidden directories and node_modules
+                            dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'node_modules']
+                            if "results.csv" in files and "output_train" in root:
+                                result_csv = os.path.join(root, "results.csv")
+                                logging.info(f"Found results.csv at: {result_csv}")
+                                break
+                        if os.path.exists(result_csv):
+                            break
+            
+            if not os.path.exists(result_csv):
+                # Last resort: search entire Documents directory for any results.csv
+                docs_dir = os.path.expanduser("~/Documents")
+                if os.path.exists(docs_dir):
+                    for root, dirs, files in os.walk(docs_dir):
+                        dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'node_modules']
+                        if "results.csv" in files:
+                            result_csv = os.path.join(root, "results.csv")
+                            logging.info(f"Found results.csv in Documents (broad search) at: {result_csv}")
+                            break
+            
             if os.path.exists(result_csv):
+                logging.info(f"Processing results.csv at: {result_csv}")
                 if self.model_kind == "segment":
                     self.collect_segment_epochs(result_csv, 0)
                 else:
                     self.collect_detect_epochs(result_csv, 0)
+            else:
+                logging.error(f"results.csv not found after exhaustive search")
         except Exception as ex:
             logging.error("Error to run do_training_epoch: " + str(ex))
             self.failed = True
@@ -190,6 +262,9 @@ class YoloTrainingManager(object):
                             device=self.training_device,
                             batch=self.training_batch,
                             optimizer=self.training_optimizer,
+                            lr0=self.training_lr,
+                            patience=self.training_patience,
+                            weight_decay=self.training_weight_decay,
                             project=self.project_train,
                             name=epoch_name,
                             exist_ok=True)
@@ -205,12 +280,57 @@ class YoloTrainingManager(object):
 
             self.best_weight = weight_file
 
+            # Find results.csv - YOLO may save it in different locations
             result_csv = os.path.join(epoch_dir, "results.csv")
+            if not os.path.exists(result_csv):
+                # Try alternative path (YOLO may save to home directory or other locations)
+                alt_epoch_dir = os.path.join(os.path.expanduser("~"), "runs", model.task, self.project_train, epoch_name)
+                result_csv = os.path.join(alt_epoch_dir, "results.csv")
+                logging.info(f"Looking for results.csv at: {result_csv}")
+            
+            if not os.path.exists(result_csv):
+                # Try Documents directory (macOS)
+                docs_runs = os.path.join(os.path.expanduser("~/Documents"), "runs", model.task, self.project_train)
+                if os.path.exists(docs_runs):
+                    for root, dirs, files in os.walk(docs_runs):
+                        if "results.csv" in files:
+                            result_csv = os.path.join(root, "results.csv")
+                            logging.info(f"Found results.csv in Documents at: {result_csv}")
+                            break
+            
+            if not os.path.exists(result_csv):
+                # Broad search in common locations
+                for search_base in [os.path.expanduser("~"), os.path.expanduser("~/Documents"), "/tmp"]:
+                    if os.path.exists(search_base):
+                        for root, dirs, files in os.walk(search_base):
+                            # Skip hidden directories and node_modules
+                            dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'node_modules']
+                            if "results.csv" in files and "output_train" in root:
+                                result_csv = os.path.join(root, "results.csv")
+                                logging.info(f"Found results.csv at: {result_csv}")
+                                break
+                        if os.path.exists(result_csv):
+                            break
+            
+            if not os.path.exists(result_csv):
+                # Last resort: search entire Documents directory for any results.csv
+                docs_dir = os.path.expanduser("~/Documents")
+                if os.path.exists(docs_dir):
+                    for root, dirs, files in os.walk(docs_dir):
+                        dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'node_modules']
+                        if "results.csv" in files:
+                            result_csv = os.path.join(root, "results.csv")
+                            logging.info(f"Found results.csv in Documents (broad search) at: {result_csv}")
+                            break
+            
             if os.path.exists(result_csv):
+                logging.info(f"Processing results.csv at: {result_csv}")
                 if self.model_kind == "segment":
                     self.collect_segment_epochs(result_csv, epoch_start)
                 else:
                     self.collect_detect_epochs(result_csv, epoch_start)
+            else:
+                logging.error(f"results.csv not found after exhaustive search")
         except Exception as ex:
             logging.error("Error to run do_training_epoch: " + str(ex))
             self.failed = True
@@ -353,7 +473,7 @@ class YoloTrainingManager(object):
                             m_map50=0,
                             m_map95=0,
                             v_box_loss=float(row['val/box_loss']),
-                            v_seg_loss=float(row['val/seg_loss']),
+                            v_seg_loss=float(row.get('val/seg_loss', 0)),
                             v_cls_loss=float(row['val/cls_loss']),
                             v_dfl_loss=float(row['val/dfl_loss']),
                             lr_pg0=float(row['lr/pg0']),

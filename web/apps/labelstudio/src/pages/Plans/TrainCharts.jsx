@@ -26,7 +26,8 @@ const CHART_CONFIGS = [
       { key: 'm_recall', name: 'Mask Recall', color: '#f39c12' }
     ],
     yLabel: '精度值',
-    yDomain: [0, 1]
+    yDomainPadding: 0.1,
+    yClampMin: 0
   },
   {
     id: 'map-chart',
@@ -38,7 +39,8 @@ const CHART_CONFIGS = [
       { key: 'm_map95', name: 'Mask mAP@0.95', color: '#f39c12' }
     ],
     yLabel: 'mAP值',
-    yDomain: [0, 0.5]
+    yDomainPadding: 0.1,
+    yClampMin: 0
   },
   {
     id: 'val-loss-chart',
@@ -54,13 +56,14 @@ const CHART_CONFIGS = [
   },
   {
     id: 'lr-chart',
-    title: '学习率变化',
+    title: '过拟合分析',
     metrics: [
-      { key: 'lr_pg0', name: 'LR PG0', color: '#3a56d6' },
-      { key: 'lr_pg1', name: 'LR PG1', color: '#e74c3c' },
-      { key: 'lr_pg2', name: 'LR PG2', color: '#2ecc71' }
+      { key: 'box_loss', name: 'Train Box Loss', color: '#3a56d6', dash: false },
+      { key: 'v_box_loss', name: 'Val Box Loss', color: '#3a56d6', dash: true },
+      { key: 'cls_loss', name: 'Train Cls Loss', color: '#e74c3c', dash: false },
+      { key: 'v_cls_loss', name: 'Val Cls Loss', color: '#e74c3c', dash: true }
     ],
-    yLabel: '学习率',
+    yLabel: 'Loss 值',
     yDomainPadding: 0.1
   },
   {
@@ -128,7 +131,7 @@ const createLineChart = (chartId, config, trainingData, setTooltip) => {
   const height = containerNode.clientHeight;
   container.html('');
   
-  const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+  const margin = { top: 20, right: 30, bottom: 40, left: 70 };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
   
@@ -153,13 +156,21 @@ const createLineChart = (chartId, config, trainingData, setTooltip) => {
     });
   });
   
-  if (config.yDomain) {
-    [yMin, yMax] = config.yDomain;
-  } else {
-    const padding = (yMax - yMin) * (config.yDomainPadding || 0.1);
-    yMin -= padding;
-    yMax += padding;
+  // Handle edge case: all values identical or no data
+  if (yMin === yMax) {
+    yMin = yMax > 0 ? yMax * 0.5 : yMax;
+    yMax = yMax > 0 ? yMax * 1.5 : 0.01;
   }
+  
+  // Apply clamp min (e.g. precision/recall/mAP >= 0)
+  if (config.yClampMin !== undefined && yMin > config.yClampMin) {
+    yMin = config.yClampMin;
+  }
+  
+  // Auto-scale padding
+  const padding = (yMax - yMin) * (config.yDomainPadding || 0.1);
+  yMin = Math.max(config.yClampMin !== undefined ? config.yClampMin : -Infinity, yMin - padding);
+  yMax += padding;
   
   const yScale = d3.scaleLinear()
     .domain([yMin, yMax])
@@ -235,6 +246,7 @@ const createLineChart = (chartId, config, trainingData, setTooltip) => {
       .attr('d', line)
       .attr('stroke', metric.color)
       .attr('stroke-width', 2)
+      .attr('stroke-dasharray', metric.dash ? '6,3' : 'none')
       .attr('fill', 'none');
     
     // 数据点
