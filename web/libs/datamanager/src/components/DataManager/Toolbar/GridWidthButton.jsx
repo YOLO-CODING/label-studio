@@ -10,12 +10,12 @@ import debounce from "lodash/debounce";
 const injector = inject(({ store }) => {
   const view = store?.currentView;
 
-  const cols = view.fieldsAsColumns ?? [];
+  const cols = view?.fieldsAsColumns ?? [];
   const hasImage = cols.some(({ type }) => type === "Image") ?? false;
 
   return {
     view,
-    isGrid: view.type === "grid",
+    isGrid: view?.type === "grid",
     gridWidth: view?.gridWidth,
     fitImagesToWidth: view?.gridFitImagesToWidth,
     hasImage,

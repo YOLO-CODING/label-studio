@@ -2,7 +2,10 @@
  * Libraries
  */
 import React, { Component } from "react";
-import { Result, Spin } from "antd";
+import Result from "antd/es/result";
+import "antd/es/result/style/css";
+import Spin from "antd/es/spin";
+import "antd/es/spin/style/css";
 import { getEnv, getRoot } from "mobx-state-tree";
 import { observer, Provider } from "mobx-react";
 

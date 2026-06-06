@@ -1,6 +1,7 @@
 import { types } from "mobx-state-tree";
 import { observer } from "mobx-react";
-import { Input } from "antd";
+import Input from "antd/es/input";
+import "antd/es/input/style/css";
 
 import ProcessAttrsMixin from "../../mixins/ProcessAttrs";
 import Registry from "../../core/Registry";

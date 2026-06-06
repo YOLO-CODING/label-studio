@@ -1,4 +1,5 @@
-import { TreeSelect } from "antd";
+import TreeSelect from "antd/es/tree-select";
+import "antd/es/tree-select/style/css";
 import type React from "react";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 

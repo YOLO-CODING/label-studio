@@ -1,18 +1,26 @@
 import { Component } from "react";
-import { Badge, Card, List, Popconfirm } from "antd";
+import Badge from "antd/es/badge";
+import "antd/es/badge/style/css";
+import Card from "antd/es/card";
+import "antd/es/card/style/css";
+import List from "antd/es/list";
+import "antd/es/list/style/css";
+import Popconfirm from "antd/es/popconfirm";
+import "antd/es/popconfirm/style/css";
 import { Button } from "@humansignal/ui";
 import { Tooltip } from "@humansignal/ui";
 import { observer } from "mobx-react";
 import {
-  DeleteOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  PlusOutlined,
-  StarFilled,
-  StarOutlined,
-  StopOutlined,
-  WindowsOutlined,
-} from "@ant-design/icons";
+  IoMdTrash,
+  IoMdEyeOff,
+  IoMdEye,
+  IoMdAdd,
+  IoMdStar,
+  IoMdStarOutline,
+  IoMdBan,
+  PiWindowsLogo,
+} from "react-icons/io";
+import { BsStarFill } from "react-icons/bs";
 
 import Utils from "../../utils";
 import styles from "./Annotations.module.scss";
@@ -58,7 +66,7 @@ const Annotation = observer(({ item, store }) => {
       }}
       aria-label="Unset ground truth"
     >
-      <StarOutlined />
+      <IoMdStarOutline />
     </Button>
   );
 
@@ -77,7 +85,7 @@ const Annotation = observer(({ item, store }) => {
         }}
         aria-label={item.ground_truth ? "Unset ground truth" : "Set ground truth"}
       >
-        {item.ground_truth ? <StarFilled /> : <StarOutlined />}
+        {item.ground_truth ? <BsStarFill /> : <IoMdStarOutline />}
       </Button>
     );
   };
@@ -162,7 +170,7 @@ const Annotation = observer(({ item, store }) => {
               cancelText="取消"
             >
               <Button size="small" look="string" variant="negative" aria-label="删除选中的标注">
-                <DeleteOutlined />
+                <IoMdTrash />
               </Button>
             </Popconfirm>
           </Tooltip>
@@ -198,7 +206,7 @@ const Annotation = observer(({ item, store }) => {
         {/* platform uses was_cancelled so check both */}
         {store.hasInterface("skip") && (item.skipped || item.was_cancelled) && (
           <Tooltip alignment="top-left" title="跳过标注">
-            <StopOutlined className={styles.skipped} />
+            <IoMdBan className={styles.skipped} />
           </Tooltip>
         )}
         {store.annotationStore.viewingAll && (
@@ -208,7 +216,7 @@ const Annotation = observer(({ item, store }) => {
             onClick={toggleVisibility}
             aria-label="Toggle visibility of current annotation"
           >
-            {item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+            {item.hidden ? <IoMdEyeOff /> : <IoMdEye />}
           </Button>
         )}
         {item.selected && btnsView()}
@@ -240,13 +248,12 @@ class Annotations extends Component {
               }}
               aria-label="Create new annotation"
             >
-              <PlusOutlined />
+              <IoMdAdd />
             </Button>
           )}
           &nbsp;
           <Button
             size="small"
-            {/* tooltip="View all annotations" */}
             tooltip="显示所有标注"
             look={store.annotationStore.viewingAll ? "filled" : "outlined"}
             onClick={(ev) => {
@@ -255,7 +262,7 @@ class Annotations extends Component {
             }}
             aria-label="Toggle view of all annotations"
           >
-            <WindowsOutlined />
+            <PiWindowsLogo />
           </Button>
         </div>
       </div>

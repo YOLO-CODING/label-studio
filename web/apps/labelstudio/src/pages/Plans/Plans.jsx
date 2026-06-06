@@ -61,7 +61,6 @@ export const PlansPage = () => {
 
   // 获取训练列表
   const fetchPlans = async (page, pageSize) => {
-    console.log({ page, pageSize });
     try {
       setLoading(true);
       const response = await api.callApi("plans", {
@@ -101,7 +100,6 @@ export const PlansPage = () => {
   };
 
   const onConfirmModelSaved = () => {
-    console.log("onConfirmModelSaved");
     history.go(0);
   };
 
@@ -377,7 +375,7 @@ export const PlansPage = () => {
       {/* Plan 配置弹出框 */}
       {currentPlan.id && (
         <PlanConfigModal
-          key={currentPlan.id}
+          key={`confirm-${currentPlan.id}`}
           opened={isModalOpen}
           mode="confirm"
           plan={currentPlan}
@@ -391,7 +389,7 @@ export const PlansPage = () => {
       )}
       {currentPlan.id && (
         <PlanConfigModal
-          key={currentPlan.id}
+          key={`edit-${currentPlan.id}`}
           opened={isEditOpen}
           mode="edit"
           plan={currentPlan}

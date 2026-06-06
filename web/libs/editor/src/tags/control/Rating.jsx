@@ -1,7 +1,8 @@
-import { Rate } from "antd";
+import Rate from "antd/es/rate";
+import "antd/es/rate/style/css";
 import { inject, observer } from "mobx-react";
 import { types } from "mobx-state-tree";
-import { StarOutlined } from "@ant-design/icons";
+import { IoMdStar } from "react-icons/io";
 import { ReadOnlyControlMixin } from "../../mixins/ReadOnlyMixin";
 
 import RequiredMixin from "../../mixins/Required";
@@ -160,7 +161,7 @@ const HtxRating = inject("store")(
     return (
       <div style={visibleStyle} onKeyDownCapture={dontBreakSubmit} ref={item.elementRef}>
         <Rate
-          character={<StarOutlined style={{ fontSize: iconSize }} />}
+          character={<IoMdStar style={{ fontSize: iconSize }} />}
           value={item.rating}
           count={Number(item.maxrating)}
           defaultValue={Number(item.defaultvalue)}

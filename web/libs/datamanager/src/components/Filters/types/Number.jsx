@@ -25,7 +25,6 @@ const RangeInput = observer(({ schema, value, onChange }) => {
   const max = value?.max ?? null;
 
   const onValueChange = (newValue) => {
-    console.log({ newValue });
     onChange(newValue);
   };
 

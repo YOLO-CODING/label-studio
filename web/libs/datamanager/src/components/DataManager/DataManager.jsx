@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import { useCallback } from "react";
-import { Draggable } from "react-beautiful-dnd";
+import { Draggable } from "@hello-pangea/dnd";
 import { cn } from "../../utils/bem";
 import { Interface } from "../Common/Interface";
 import { Space } from "../Common/Space/Space";

@@ -1,5 +1,10 @@
 import { Component, Fragment } from "react";
-import { Dropdown, Menu, Slider } from "antd";
+import Dropdown from "antd/es/dropdown";
+import "antd/es/dropdown/style/css";
+import Menu from "antd/es/menu";
+import "antd/es/menu/style/css";
+import Slider from "antd/es/slider";
+import "antd/es/slider/style/css";
 import { Button, IconRefresh } from "@humansignal/ui";
 import { observer } from "mobx-react";
 

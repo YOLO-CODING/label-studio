@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import { getRoot } from "mobx-state-tree";
 import { Button, Tooltip } from "@humansignal/ui";
-import { PauseCircleOutlined, PlayCircleOutlined } from "@ant-design/icons";
+import { IoMdPause, IoMdPlay } from "react-icons/io";
 import styles from "./Paragraphs.module.scss";
 import { FF_LSDV_E_278, FF_NER_SELECT_ALL, isFF } from "../../../utils/feature-flags";
 import { IconPause, IconPlay, IconLsLabeling } from "@humansignal/icons";
@@ -219,12 +219,12 @@ export const Phrases = observer(({ item, playingId, activeRef, setIsInViewPort, 
                 isFF(FF_LSDV_E_278) ? (
                   <IconPause />
                 ) : (
-                  <PauseCircleOutlined />
+                  <IoMdPause />
                 )
               ) : isFF(FF_LSDV_E_278) ? (
                 <IconPlay />
               ) : (
-                <PlayCircleOutlined />
+                <IoMdPlay />
               )
             }
             onClick={(e) => {

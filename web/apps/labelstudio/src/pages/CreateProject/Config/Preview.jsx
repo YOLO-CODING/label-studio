@@ -62,18 +62,31 @@ export const Preview = ({ config, data, error, loading, project }) => {
   }, [config]);
 
   const initLabelStudio = useCallback(async (config, task) => {
-    // wait for dependencies to load, the promise is resolved only once
-    // and is started when the component is mounted for the first time
     await loadDependencies();
 
-    if (lsf.current || !task.data) return;
+    if (!task.data) return;
+
+    if (lsf.current) {
+      const store = lsf.current.store;
+
+      store.resetState();
+      store.assignTask(task);
+      store.assignConfig(config);
+      store.initializeStore(task);
+
+      const c = store.annotationStore.addAnnotation({
+        userGenerate: true,
+      });
+
+      store.annotationStore.selectAnnotation(c.id);
+      return;
+    }
 
     try {
       lsf.current = new window.LabelStudio(rootRef.current, {
         config,
         task,
         interfaces: ["side-column"],
-        // with SharedStore we should use more late event
         onStorageInitialized(LS) {
           LS.settings.bottomSidePanel = true;
 
@@ -85,7 +98,6 @@ export const Preview = ({ config, data, error, loading, project }) => {
             setStoreReady(true);
           };
 
-          // and even then we need to wait a little even after the store is initialized
           setTimeout(initAnnotation);
         },
       });
@@ -104,24 +116,8 @@ export const Preview = ({ config, data, error, loading, project }) => {
   }, [loading, error]);
 
   useEffect(() => {
-    initLabelStudio(currentConfig, currentTask).then(() => {
-      if (storeReady && lsf.current?.store) {
-        const store = lsf.current.store;
-
-        store.resetState();
-        store.assignTask(currentTask);
-        store.assignConfig(currentConfig);
-        store.initializeStore(currentTask);
-
-        const c = store.annotationStore.addAnnotation({
-          userGenerate: true,
-        });
-
-        store.annotationStore.selectAnnotation(c.id);
-        console.log("LSF updated");
-      }
-    });
-  }, [currentConfig, currentTask, storeReady]);
+    initLabelStudio(currentConfig, currentTask);
+  }, [currentConfig, currentTask]);
 
   useEffect(() => {
     return () => {
@@ -139,7 +135,7 @@ export const Preview = ({ config, data, error, loading, project }) => {
       {error && (
         <div className={configClass.elem("preview-error")}>
           <h2>
-            {error.detail} {error.id}
+            {error.detail || error.message || "验证失败"} {error.id}
           </h2>
           {error.validation_errors?.non_field_errors?.map?.((err) => (
             <p key={err}>{err}</p>
@@ -150,6 +146,20 @@ export const Preview = ({ config, data, error, loading, project }) => {
           {error.validation_errors?.map?.((err) => (
             <p key={err}>{err}</p>
           ))}
+          {/* Handle DRF field errors directly */}
+          {Object.keys(error)
+            .filter((key) => key !== "detail" && key !== "id" && key !== "validation_errors")
+            .map((key) => {
+              const messages = error[key];
+              if (Array.isArray(messages)) {
+                return messages.map((msg, idx) => (
+                  <p key={`${key}-${idx}`}>
+                    <strong>{key}:</strong> {msg}
+                  </p>
+                ));
+              }
+              return null;
+            })}
         </div>
       )}
       {!data && loading && <Spinner style={{ width: "100%", height: "50vh" }} />}

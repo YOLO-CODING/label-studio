@@ -128,7 +128,6 @@ const handleError = async (
   const errorDetails = errorFormatter(result);
 
   // Allow inline error handling
-  console.log(showGlobalError);
   if (!showGlobalError) {
     return errorDetails.isShutdown;
   }

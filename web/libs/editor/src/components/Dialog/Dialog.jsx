@@ -1,6 +1,7 @@
 import React from "react";
 import { PropTypes } from "prop-types";
-import { Tag } from "antd";
+import Tag from "antd/es/tag";
+import "antd/es/tag/style/css";
 
 import styles from "./Dialog.module.scss";
 

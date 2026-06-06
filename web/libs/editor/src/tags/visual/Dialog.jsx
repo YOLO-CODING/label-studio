@@ -1,6 +1,9 @@
 import { inject, observer } from "mobx-react";
 import { types } from "mobx-state-tree";
-import { Divider, Empty } from "antd";
+import Divider from "antd/es/divider";
+import "antd/es/divider/style/css";
+import Empty from "antd/es/empty";
+import "antd/es/empty/style/css";
 
 import { guidGenerator } from "../../utils/unique";
 import Registry from "../../core/Registry";

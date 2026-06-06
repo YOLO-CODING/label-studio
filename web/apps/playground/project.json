@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
+        "compiler": "swc",
         "outputPath": "dist/apps/playground/playground-assets",
         "index": "apps/playground/src/index.html",
         "baseHref": "/",

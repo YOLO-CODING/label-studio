@@ -3,7 +3,8 @@ import * as d3 from "d3";
 import { inject, observer } from "mobx-react";
 import { getEnv, getRoot, getType, types, isAlive } from "mobx-state-tree";
 import throttle from "lodash/throttle";
-import { Spin } from "antd";
+import Spin from "antd/es/spin";
+import "antd/es/spin/style/css";
 
 import ObjectBase from "./Base";
 import ObjectTag from "../../components/Tags/Object";

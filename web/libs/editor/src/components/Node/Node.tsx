@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { getType } from "mobx-state-tree";
 import { observer } from "mobx-react";
-import { ApartmentOutlined, AudioOutlined, LineChartOutlined, MessageOutlined } from "@ant-design/icons";
+import { PiBuildingApartment, PiSpeakerSimpleHigh, PiChartLine, PiChatDots } from "react-icons/pi";
 
 import Registry from "../../core/Registry";
 import "./Node.scss";
@@ -59,17 +59,17 @@ const NodeViews: Record<string, NodeViewProps> = {
 
   AudioRegionModel: {
     name: "Audio",
-    icon: AudioOutlined,
+    icon: PiSpeakerSimpleHigh,
   },
 
   TimeSeriesRegionModel: {
     name: "TimeSeries",
-    icon: LineChartOutlined,
+    icon: PiChartLine,
   },
 
   TextAreaRegionModel: {
     name: "Input",
-    icon: MessageOutlined,
+    icon: PiChatDots,
     getContent: (node) => <span style={{ color: "#5a5a5a" }}>{node._value}</span>,
   },
 
@@ -125,12 +125,12 @@ const NodeViews: Record<string, NodeViewProps> = {
 
   ChoicesModel: {
     name: "Classification",
-    icon: ApartmentOutlined,
+    icon: PiBuildingApartment,
   },
 
   TextAreaModel: {
     name: "Input",
-    icon: MessageOutlined,
+    icon: PiChatDots,
   },
 
   TimelineRegionModel: {

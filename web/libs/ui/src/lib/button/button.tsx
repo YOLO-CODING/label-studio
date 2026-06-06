@@ -135,27 +135,28 @@ export type ButtonProps = {
  * - Waiting state with secondary action
  * - Icons support
  */
-const Button = forwardRef(
-  (
-    {
-      children,
-      className = "",
-      variant = "primary",
-      look = "filled",
-      size = "medium",
-      waiting = false,
-      align = "default",
-      waitingClickable = false,
-      icon,
-      leading = icon,
-      trailing,
-      tooltip,
-      onClick,
-      secondaryOnClick,
-      ...buttonProps
-    }: PropsWithChildren<ButtonProps>,
-    ref,
-  ): JSX.Element => {
+  const Button = forwardRef(
+    (
+      {
+        children,
+        className = "",
+        variant = "primary",
+        look = "filled",
+        size = "medium",
+        waiting = false,
+        align = "default",
+        waitingClickable = false,
+        icon,
+        leading = icon,
+        trailing,
+        tooltip,
+        onClick,
+        secondaryOnClick,
+        primary,
+        ...buttonProps
+      }: PropsWithChildren<ButtonProps>,
+      ref,
+    ): JSX.Element => {
     const buttonClassName = cn(buttonVariant({ variant, look, size, waiting, align }, className));
     const iconClassName = "inline-flex gap-tight not-italic items-center";
     const contentClassName = "inline-flex flex-1 whitespace-pre items-center px-tight";
@@ -190,11 +191,18 @@ const Button = forwardRef(
   },
 );
 
-const ButtonGroup = ({ children, collapsed = true }: PropsWithChildren<{ collapsed?: boolean }>) => {
-  const className = cn("inline-flex", styles["button-group"], {
-    [styles["button-group-collapsed"]]: collapsed,
-  });
-  return <div className={className}>{children}</div>;
-};
+const ButtonGroup = forwardRef<HTMLDivElement, PropsWithChildren<{ collapsed?: boolean }>>(
+  ({ children, collapsed = true }: PropsWithChildren<{ collapsed?: boolean }>, ref) => {
+    const className = cn("inline-flex", styles["button-group"], {
+      [styles["button-group-collapsed"]]: collapsed,
+    });
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
+  }
+);
+ButtonGroup.displayName = "ButtonGroup";
 
 export { Button, ButtonGroup };

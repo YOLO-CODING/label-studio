@@ -1,6 +1,6 @@
 import { Button } from "@humansignal/ui";
 import { createRef } from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { cn } from "../../../utils/bem";
 import { Space } from "../Space/Space";
 import { Modal } from "./ModalPopup";
@@ -8,23 +8,30 @@ import { Modal } from "./ModalPopup";
 const standaloneModal = (props) => {
   const modalRef = createRef();
   const rootDiv = document.createElement("div");
+  let root = null;
 
   rootDiv.className = cn("modal-holder").toClassName();
 
   document.body.appendChild(rootDiv);
 
   const renderModal = (props, animate) => {
-    render(
+    if (!root) {
+      root = createRoot(rootDiv);
+    }
+    root.render(
       <Modal
         ref={modalRef}
         {...props}
         onHide={() => {
           props.onHidden?.();
-          rootDiv.remove();
+          if (root) {
+            root.unmount();
+            rootDiv.remove();
+            root = null;
+          }
         }}
         animateAppearance={animate}
       />,
-      rootDiv,
     );
   };
 

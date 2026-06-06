@@ -125,3 +125,7 @@ libs/datamanager/.cache
 dist
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+# Bundle analyzer artifacts
+bundle-report.html
+bundle-stats.json

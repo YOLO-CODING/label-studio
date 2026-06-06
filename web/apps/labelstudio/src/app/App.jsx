@@ -1,7 +1,7 @@
 /* global Sentry */
 
 import { createBrowserHistory } from "history";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Router } from "react-router-dom";
 import { LEAVE_BLOCKER_KEY, leaveBlockerCallback } from "../components/LeaveBlocker/LeaveBlocker";
 import { initSentry } from "../config/Sentry";
@@ -88,7 +88,8 @@ const App = ({ content }) => {
 const root = document.querySelector(".app-wrapper");
 const content = document.querySelector("#main-content");
 
-render(<App content={content.innerHTML} />, root);
+const appRoot = createRoot(root);
+appRoot.render(<App content={content.innerHTML} />);
 
 if (module?.hot) {
   module.hot.accept(); // Enable HMR for React components

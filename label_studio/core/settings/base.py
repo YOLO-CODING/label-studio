@@ -781,6 +781,13 @@ if get_env('STORAGE_TYPE') == 'gcs':
 CSRF_TRUSTED_ORIGINS = get_env('CSRF_TRUSTED_ORIGINS', [])
 if CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS.split(',')
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8010',
+        'http://127.0.0.1:8010',
+        'http://localhost:8080',
+        'http://127.0.0.1:8080',
+    ]
 
 # Custom S3 endpoints on these domains will get detailed error reporting
 S3_TRUSTED_STORAGE_DOMAINS = get_env_list(
@@ -823,6 +830,7 @@ if ENABLE_CSP := get_bool_env('ENABLE_CSP', True):
         "'self'",
         "'report-sample'",
         "'unsafe-inline'",
+        "'unsafe-eval'",
         'blob:',
         'browser.sentry-cdn.com',
         'https://*.googletagmanager.com',

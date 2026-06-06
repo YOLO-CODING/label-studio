@@ -219,7 +219,7 @@ const invokeAction = (action, destructive, store, formRef) => {
 export const ActionsButton = injector(
   observer(({ store, size, hasSelected, ...rest }) => {
     const formRef = useRef();
-    const selectedCount = store.currentView.selectedCount;
+    const selectedCount = store.currentView?.selectedCount ?? 0;
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 

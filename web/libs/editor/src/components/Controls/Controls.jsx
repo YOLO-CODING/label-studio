@@ -1,5 +1,5 @@
 import { inject, observer } from "mobx-react";
-import { CheckCircleOutlined, CheckOutlined } from "@ant-design/icons";
+import { IoMdCheckmarkCircleOutline, IoMdCheckmark } from "react-icons/io";
 
 import Hint from "../Hint/Hint";
 import { DraftPanel } from "../Annotations/Annotations";
@@ -73,7 +73,7 @@ export default inject("store")(
           <Button
             disabled={disabled}
             look="primary"
-            icon={<CheckOutlined />}
+            icon={<IoMdCheckmark />}
             onClick={store.submitAnnotation}
             tooltip="Save results: [ Ctrl+Enter ]"
             className={`${styles.submit} ${submitButtonClassName}`}
@@ -88,7 +88,7 @@ export default inject("store")(
           <Button
             disabled={disabled}
             look="primary"
-            icon={<CheckCircleOutlined />}
+            icon={<IoMdCheckmarkCircleOutline />}
             onClick={store.updateAnnotation}
             tooltip="Update this task: [ Alt+Enter ]"
             className={updateButtonClassName}

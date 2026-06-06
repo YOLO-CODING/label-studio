@@ -406,14 +406,13 @@ const Configurator = ({
         errorFilter: () => true,
       });
 
+      console.log("[Preview Debug] validation:", JSON.stringify(validation));
       if (validation?.error) {
         setError(validation.response);
-        setLoading(false);
-        return;
+      } else {
+        setError(null);
+        onValidate?.(validation);
       }
-
-      setError(null);
-      onValidate?.(validation);
 
       const sample = await api.callApi("createSampleTask", {
         params: { pk: project.id },
@@ -421,13 +420,12 @@ const Configurator = ({
         errorFilter: () => true,
       });
 
+      console.log("[Preview Debug] sample:", JSON.stringify(sample));
       setLoading(false);
       if (sample && !sample.error) {
         setData(sample.sample_task);
         setConfigToDisplay(configToCheck);
-      } else {
-        // @todo validation can be done in this place,
-        // @todo but for now it's extremely slow in /sample-task endpoint
+      } else if (!validation?.error) {
         setError(sample?.response);
       }
     };

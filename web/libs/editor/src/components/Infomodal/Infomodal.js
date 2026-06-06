@@ -1,4 +1,5 @@
-import { Modal } from "antd";
+import Modal from "antd/es/modal";
+import "antd/es/modal/style/css";
 
 const wrapper = (_type, value, title) => {
   const custom = {

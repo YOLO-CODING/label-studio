@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import { flow, getRoot, types } from "mobx-state-tree";
-import { Spin } from "antd";
+import Spin from "antd/es/spin";
+import "antd/es/spin/style/css";
 
 import Infomodal from "../../../components/Infomodal/Infomodal";
 import { NewTaxonomy } from "../../../components/NewTaxonomy/NewTaxonomy";
