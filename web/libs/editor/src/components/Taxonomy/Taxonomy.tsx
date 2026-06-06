@@ -1,5 +1,8 @@
 import React, { type FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Dropdown, Menu } from "antd";
+import Dropdown from "antd/es/dropdown";
+import "antd/es/dropdown/style/css";
+import Menu from "antd/es/menu";
+import "antd/es/menu/style/css";
 
 import { IconChevron } from "@humansignal/icons";
 import { Button, Tooltip } from "@humansignal/ui";

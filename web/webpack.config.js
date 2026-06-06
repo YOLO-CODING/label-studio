@@ -1,4 +1,5 @@
 // const path = require('path');
+const fs = require("fs");
 const path = require("path");
 const { composePlugins, withNx } = require("@nx/webpack");
 const { withReact } = require("@nx/react");
@@ -13,13 +14,14 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { EnvironmentPlugin, DefinePlugin, ProgressPlugin, optimize } = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 const RELEASE = require("./release").getReleaseName();
 
 const css_prefix = "lsf-";
 const mode = process.env.BUILD_MODULE ? "production" : process.env.NODE_ENV || "development";
 const isDevelopment = mode !== "production";
-const devtool = process.env.NODE_ENV === "production" ? "source-map" : "cheap-module-source-map";
+const devtool = process.env.NODE_ENV === "production" ? "source-map" : "eval-cheap-source-map";
 const FRONTEND_HMR = process.env.FRONTEND_HMR === "true";
 const FRONTEND_HOSTNAME = FRONTEND_HMR ? process.env.FRONTEND_HOSTNAME || "http://localhost:8010" : "";
 const DJANGO_HOSTNAME = process.env.DJANGO_HOSTNAME || "http://localhost:8080";
@@ -42,6 +44,18 @@ const plugins = [
   }),
   new EnvironmentPlugin(LOCAL_ENV),
 ];
+
+if (process.env.ANALYZE === "true") {
+  plugins.push(
+    new BundleAnalyzerPlugin({
+      analyzerMode: "static",
+      reportFilename: path.resolve(__dirname, "bundle-report.html"),
+      openAnalyzer: false,
+      generateStatsFile: true,
+      statsFilename: path.resolve(__dirname, "bundle-stats.json"),
+    }),
+  );
+}
 
 const optimizer = () => {
   const result = {
@@ -142,6 +156,15 @@ module.exports = composePlugins(
       syncWebAssembly: true,
       asyncWebAssembly: true,
     };
+
+    // Fix SWC target to ES2022 to avoid .apply transpilation of spread operator
+    config.module.rules.forEach((rule) => {
+      if (rule.loader && typeof rule.loader === 'string' && rule.loader.includes("swc-loader")) {
+        rule.options = rule.options || {};
+        rule.options.jsc = rule.options.jsc || {};
+        rule.options.jsc.target = "es2022";
+      }
+    });
 
     config.module.rules.forEach((rule) => {
       const testString = rule.test.toString();
@@ -263,13 +286,45 @@ module.exports = composePlugins(
       "react-joyride": path.resolve(__dirname, "node_modules/react-joyride"),
       "@humansignal/ui": path.resolve(__dirname, "libs/ui"),
       "@humansignal/core": path.resolve(__dirname, "libs/core"),
+      // react-icons tree-shaking shim: redirect each subpackage to a generated
+      // file that only re-exports the icons actually used in the codebase.
+      // Regenerate via: node tools/react-icons-shim/generate.js
+      ...Object.fromEntries(
+        fs
+          .readdirSync(path.resolve(__dirname, "tools/react-icons-shim/dist"))
+          .filter((f) => f.endsWith(".mjs"))
+          .map((f) => [
+            `react-icons/${path.basename(f, ".mjs")}$`,
+            path.resolve(__dirname, "tools/react-icons-shim/dist", f),
+          ]),
+      ),
     };
 
     return merge(config, {
       devtool,
       mode,
       plugins,
+      cache: isDevelopment
+        ? {
+            type: 'filesystem',
+            buildDependencies: {
+              config: [__filename],
+            },
+          }
+        : false,
+      infrastructureLogging: {
+        level: 'error',
+      },
       optimization: optimizer(),
+      ignoreWarnings: [
+        (warning) => warning.message?.includes("Sass @import rules are deprecated"),
+        (warning) => warning.message?.includes("selector-append") || warning.message?.includes("bogus-combinators") || warning.message?.includes("Global built-in functions"),
+        (warning) => warning.message?.includes("Sass's behavior for declarations that appear after nested"),
+        (warning) => warning.message?.includes("mixed-decls"),
+        (warning) => warning.message?.includes("autoprefixer: end value has mixed support"),
+        (warning) => warning.message?.includes("repetitive deprecation warnings omitted"),
+        (warning) => warning.message?.includes("No serializer registered for ConstDependency"),
+      ],
       devServer: process.env.MODE?.startsWith("standalone")
         ? {}
         : {

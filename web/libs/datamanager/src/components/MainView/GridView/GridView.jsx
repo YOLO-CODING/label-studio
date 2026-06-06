@@ -150,13 +150,16 @@ export const GridView = observer(({ data, view, loadMore, fields, onChange, hidd
     CELL_HEADER_HEIGHT + rowHeight * (hasImage ? Math.max(1, (IMAGE_SIZE_COEFFICIENT - columnCount) * 0.5) : 1);
 
   // Calculate the total number of rows needed to display all items
-  const itemCount = view.dataStore.total || data.length;
+  // Use data.length instead of view.dataStore.total to avoid out-of-bounds access
+  // for items that haven't been loaded yet
+  const itemCount = data.length;
   // Use only loaded data for grid dimensions to avoid long scrollbar
   const loadedRows = Math.ceil(data.length / columnCount);
 
   const renderItem = useCallback(
     ({ style, rowIndex, columnIndex }) => {
       const index = getCellIndex(rowIndex, columnIndex);
+      if (index >= data.length) return null;
       const row = data[index];
       if (!row) return null;
 

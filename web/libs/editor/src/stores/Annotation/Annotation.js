@@ -860,6 +860,7 @@ const _Annotation = types
     },
 
     dropDraft() {
+      if (!isAlive(self)) return;
       if (!self.autosave) return;
       self.autosave.cancel();
       self.draftId = 0;

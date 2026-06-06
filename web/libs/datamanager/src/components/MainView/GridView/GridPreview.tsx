@@ -1,4 +1,4 @@
-import { CloseOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { IoMdClose, IoMdHelpCircle } from "react-icons/io";
 import { FaCircleChevronLeft, FaCircleChevronRight  } from "react-icons/fa6"; 
 import { Button, Checkbox } from "@humansignal/ui";
 import { observer } from "mobx-react";
@@ -114,9 +114,9 @@ const TaskModal = observer(({ view, tasks, imageField, currentTaskId, setCurrent
         </Checkbox>
         <div className={styles.actions}>
           <Tooltip title={tooltip}>
-            <Icon icon={QuestionCircleOutlined} />
+            <Icon icon={IoMdHelpCircle} />
           </Tooltip>
-          <Icon icon={CloseOutlined} onClick={onClose} />
+          <Icon icon={IoMdClose} onClick={onClose} />
         </div>
       </div>
       <div className="grid grid-cols-[35px_1fr_35px]" style={{alignItems:'center'}}>

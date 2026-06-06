@@ -1,6 +1,5 @@
 import { configure } from "mobx";
 import { destroy } from "mobx-state-tree";
-import { render, unmountComponentAtNode } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { toCamelCase } from "strman";
 import { LabelStudio as LabelStudioReact } from "./Component";
@@ -125,6 +124,7 @@ export class LabelStudio {
   async createAppV17() {
     const { store } = await configureStore(this.options, this.events);
     const rootElement = this.getRootElement(this.root);
+    const root = createRoot(rootElement);
 
     this.store = store;
     window.Htx = this.store;
@@ -135,7 +135,7 @@ export class LabelStudio {
       if (isRendered) {
         clearRenderedApp();
       }
-      render(<App store={this.store} />, rootElement);
+      root.render(<App store={this.store} />);
     };
 
     const clearRenderedApp = () => {
@@ -145,7 +145,7 @@ export class LabelStudio {
       // cleanDomAfterReact needs this key to be sure that cleaning affects only current react subtree
       const reactKey = findReactKey(childNodes[0]);
 
-      unmountComponentAtNode(rootElement);
+      root.unmount();
       /*
         Unmounting doesn't help with clearing React's fibers
         but removing the manually helps

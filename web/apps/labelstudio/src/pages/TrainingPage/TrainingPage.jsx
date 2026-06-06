@@ -40,8 +40,6 @@ export const TrainingPage = () => {
       },
     });
 
-    console.log('training response', response)
-
 
     if (response.id) {
        window.location = "/plans"

@@ -1,4 +1,4 @@
-import { LoadingOutlined } from "@ant-design/icons";
+import { ImSpinner2 } from "react-icons/im";
 import * as ff from "@humansignal/core/lib/utils/feature-flags/ff";
 import { observe } from "mobx";
 import { inject, observer } from "mobx-react";
@@ -578,7 +578,7 @@ class RichTextPieceView extends Component {
     return (
       <Block name="richtext" tag={ObjectTag} item={item}>
         <Elem name="loading" ref={this.loadingRef}>
-          <LoadingOutlined />
+          <ImSpinner2 className="animate-spin" />
         </Elem>
 
         <Elem

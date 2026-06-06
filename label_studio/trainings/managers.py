@@ -56,11 +56,12 @@ def emojis(string=""):
 class YoloTrainingManager(object):
     def __init__(self, label_type, working_dir, dataset_entry, last_weight, imgsz, plan):
         self.label_type = label_type or "RectangleLabels"
+        model_scale = self.training_config.get('model', 'n')
         if label_type == "PolygonLabels":
-            self.initial_model = "yolo26n-seg.yaml"
+            self.initial_model = f"yolo26{model_scale}-seg.yaml"
             self.model_kind = "segment"
         else:
-            self.initial_model = "yolo26n.yaml"
+            self.initial_model = f"yolo26{model_scale}.yaml"
             self.model_kind = "detect"
         self.working_dir = working_dir
         self.dataset_entry = dataset_entry
@@ -81,8 +82,8 @@ class YoloTrainingManager(object):
         self.training_patience = self.training_config.get('patience', 50)
         self.training_weight_decay = self.training_config.get('weight_decay', 0.0005)
 
-        self.project_train = os.path.join(working_dir, "output_train")
-        self.project_val = os.path.join(working_dir, "output_val")
+        self.project_train = "output_train"
+        self.project_val = "output_val"
         self.failed = False
         self.fail_message = None
         self.best_weight = None

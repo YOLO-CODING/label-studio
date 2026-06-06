@@ -1,5 +1,10 @@
 import React, { useMemo } from "react";
-import { Modal, Table, Tabs } from "antd";
+import Modal from "antd/es/modal";
+import "antd/es/modal/style/css";
+import Table from "antd/es/table";
+import "antd/es/table/style/css";
+import Tabs from "antd/es/tabs";
+import "antd/es/tabs/style/css";
 import { observer } from "mobx-react";
 
 import { Hotkey } from "../../core/Hotkey";

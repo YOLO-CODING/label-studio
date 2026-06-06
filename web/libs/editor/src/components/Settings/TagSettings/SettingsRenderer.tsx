@@ -1,4 +1,5 @@
-import { Input } from "antd";
+import Input from "antd/es/input";
+import "antd/es/input/style/css";
 import { Checkbox } from "@humansignal/ui";
 import { observer } from "mobx-react";
 import type { FC } from "react";

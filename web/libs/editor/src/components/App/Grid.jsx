@@ -1,7 +1,8 @@
 import React, { Component } from "react";
-import { Spin } from "antd";
+import Spin from "antd/es/spin";
+import "antd/es/spin/style/css";
 import { Button } from "@humansignal/ui";
-import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import styles from "./Grid.module.scss";
 import { EntityTab } from "../AnnotationTabs/AnnotationTabs";
 import { observe } from "mobx";
@@ -214,10 +215,10 @@ export default class Grid extends Component {
           )}
         </div>
         <Button size="small" look="string" onClick={this.left} className={styles.left} aria-label="Move left">
-          <LeftCircleOutlined />
+          <IoIosArrowBack size={20} />
         </Button>
         <Button size="small" look="string" onClick={this.right} className={styles.right} aria-label="Move right">
-          <RightCircleOutlined />
+          <IoIosArrowForward size={20} />
         </Button>
       </div>
     );

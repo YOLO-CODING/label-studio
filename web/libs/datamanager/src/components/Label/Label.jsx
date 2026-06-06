@@ -110,7 +110,7 @@ export const Labeling = injector(
                 showResizerLine={false}
                 type={"quickview"}
                 maxWidth={window.innerWidth * 0.35}
-                initialWidth={view.labelingTableWidth} // hardcoded as in main-menu-trigger
+                initialWidth={view?.labelingTableWidth ?? 300} // hardcoded as in main-menu-trigger
                 onResizeFinished={onResize}
                 style={{ display: "flex", flex: 1, width: "100%" }}
               >

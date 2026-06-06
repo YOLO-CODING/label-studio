@@ -1,5 +1,5 @@
 import { createRef } from "react";
-import { render, unmountComponentAtNode } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { ApiProvider } from "../../providers/ApiProvider";
 import { ConfigProvider } from "../../providers/ConfigProvider";
 import { CurrentUserProvider } from "../../providers/CurrentUser";
@@ -16,6 +16,7 @@ const standaloneModal = (props) => {
   const modalRef = createRef();
   const rootDiv = document.createElement("div");
   let renderCount = 0;
+  let root = null;
   rootDiv.className = cn("modal-holder").toClassName();
 
   document.body.appendChild(rootDiv);
@@ -23,8 +24,12 @@ const standaloneModal = (props) => {
   const renderModal = (props, animate) => {
     renderCount++;
 
+    if (!root) {
+      root = createRoot(rootDiv);
+    }
+
     // simple modals don't require any parts of the app and can't cause the loop of death
-    render(
+    root.render(
       <MultiProvider
         key={`modal-${renderCount}`}
         providers={
@@ -44,14 +49,16 @@ const standaloneModal = (props) => {
           {...props}
           onHide={() => {
             props.onHidden?.();
-            unmountComponentAtNode(rootDiv);
+            if (root) {
+              root.unmount();
+            }
             rootDiv.remove();
+            root = null;
           }}
           animateAppearance={animate}
         />
         {!props.simple && <ToastViewport />}
       </MultiProvider>,
-      rootDiv,
     );
   };
 
@@ -63,8 +70,11 @@ const standaloneModal = (props) => {
     },
     close() {
       const result = modalRef.current.hide();
-      unmountComponentAtNode(rootDiv);
+      if (root) {
+        root.unmount();
+      }
       rootDiv.remove();
+      root = null;
       return result;
     },
   };

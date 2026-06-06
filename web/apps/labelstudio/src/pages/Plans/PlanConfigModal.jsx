@@ -22,7 +22,7 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
   };
 
   const initialExtraConfig = parseExtraConfig();
-  const [model, setModel] = useState(initialExtraConfig.model || "yolov8n");
+  const [model, setModel] = useState(initialExtraConfig.model || "n");
   const [batchSize, setBatchSize] = useState(initialExtraConfig.batch_size || 16);
   const [lr, setLr] = useState(initialExtraConfig.lr || 0.01);
   const [optimizer, setOptimizer] = useState(initialExtraConfig.optimizer || "SGD");
@@ -41,8 +41,6 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
   useEffect(() => {
     if (modalRef.current && opened) {
       modalRef.current?.show?.();
-    } else if (modalRef.current && modalRef.current.visible) {
-      modalRef.current?.hide?.();
     }
   }, [opened]);
 
@@ -93,7 +91,7 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
   const buildExtraConfig = () => {
     const { model, batchSize, lr, optimizer, patience, weightDecay } = latestState.current;
     return JSON.stringify({
-      model: model || "yolov8n",
+      model: model || "n",
       batch_size: batchSize || 16,
       lr: lr || 0.01,
       optimizer: optimizer || "SGD",
@@ -225,11 +223,11 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
               <Select
                 name="model"
                 options={[
-                  { value: "yolov8n", label: "YOLOv8n (nano)" },
-                  { value: "yolov8s", label: "YOLOv8s (small)" },
-                  { value: "yolov8m", label: "YOLOv8m (medium)" },
-                  { value: "yolov8l", label: "YOLOv8l (large)" },
-                  { value: "yolov8x", label: "YOLOv8x (xlarge)" },
+                  { value: "n", label: "Nano (最快，精度最低)" },
+                  { value: "s", label: "Small" },
+                  { value: "m", label: "Medium" },
+                  { value: "l", label: "Large" },
+                  { value: "x", label: "Xlarge (最慢，精度最高)" },
                 ]}
                 value={model}
                 onChange={handleModelChange}

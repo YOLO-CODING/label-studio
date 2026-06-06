@@ -16,13 +16,13 @@ const svgString = `<svg width="692" height="521" stroke-width=".5px" viewBox="0 
 .layer3 { animation: parallaxUp 1.5s ease-out 0.4s forwards; opacity: 0; }
 .layer4 { animation: parallaxUp 1.5s ease-out 0.6s forwards; opacity: 0; }
 </style>
-<rect x="167" y="121" width="217" height="290" fill="url(#pattern0_20_20)" class="layer4"/>
-<circle cx="289.5" cy="110.5" r="61.5" fill="#EE903F" fill-opacity="0.65" class="layer1"/>
-<path d="M62 96H430M0 222H469M134 0V278M261 79V442" stroke="#333" class="layer3"/>
-<rect x="154.5" y="131.5" width="148" height="148" fill="#C71732" fill-opacity="0.88"  class="layer2"/>
-<rect x="154.5" y="131.5" width="148" height="148" stroke="black"  class="layer2"/>
-<circle cx="167" cy="247" r="79" fill="#042F6D" fill-opacity="0.48" class="layer3"/>
-<path d="M131 346.446H692M412 96V521" stroke="black"  class="layer1"/>
+<rect x="167" y="121" width="217" height="290" fill="url(#pattern0_20_20)" className="layer4"/>
+<circle cx="289.5" cy="110.5" r="61.5" fill="#EE903F" fill-opacity="0.65" className="layer1"/>
+<path d="M62 96H430M0 222H469M134 0V278M261 79V442" stroke="#333" className="layer3"/>
+<rect x="154.5" y="131.5" width="148" height="148" fill="#C71732" fill-opacity="0.88"  className="layer2"/>
+<rect x="154.5" y="131.5" width="148" height="148" stroke="black"  className="layer2"/>
+<circle cx="167" cy="247" r="79" fill="#042F6D" fill-opacity="0.48" className="layer3"/>
+<path d="M131 346.446H692M412 96V521" stroke="black"  className="layer1"/>
 <defs>
 <pattern id="pattern0_20_20" patternContentUnits="objectBoundingBox" width="1" height="1">
 <use xlink:href="#image0_20_20" transform="matrix(0.000928059 0 0 0.000694444 -0.00115207 0)"/>

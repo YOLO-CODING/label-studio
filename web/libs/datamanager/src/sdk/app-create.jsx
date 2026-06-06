@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { App } from "../components/App/App";
 import { AppStore } from "../stores/AppStore";
 import * as DataStores from "../stores/DataStores";
@@ -69,7 +69,8 @@ export const createApp = async (rootNode, datamanager) => {
 
   window.DM = appStore;
 
-  ReactDOM.render(<App app={appStore} />, rootNode);
+  const root = createRoot(rootNode);
+  root.render(<App app={appStore} />);
 
-  return appStore;
+  return { appStore, root };
 };

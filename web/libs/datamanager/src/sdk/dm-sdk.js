@@ -41,7 +41,6 @@
 
 import { inject, observer } from "mobx-react";
 import { destroy } from "mobx-state-tree";
-import { unmountComponentAtNode } from "react-dom";
 import { toCamelCase } from "strman";
 import { instruments } from "../components/DataManager/Toolbar/instruments";
 import { APIProxy } from "../utils/api-proxy";
@@ -404,7 +403,9 @@ export class DataManager {
 
   /** @private */
   async initApp() {
-    this.store = await createApp(this.root, this);
+    const { appStore, root } = await createApp(this.root, this);
+    this.store = appStore;
+    this._root = root;
     this.invoke("ready", [this]);
   }
 
@@ -458,7 +459,10 @@ export class DataManager {
     if (isFF(FF_LSDV_4620_3_ML)) {
       this.destroyLSF();
     }
-    unmountComponentAtNode(this.root);
+    if (this._root) {
+      this._root.unmount();
+      this._root = null;
+    }
 
     if (this.store) {
       destroy(this.store);

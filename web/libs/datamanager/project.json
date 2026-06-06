@@ -9,7 +9,7 @@
       "executor": "@nx/webpack:webpack",
       "defaultConfiguration": "production",
       "options": {
-        "compiler": "babel",
+        "compiler": "swc",
         "webpackConfig": "webpack.config.js",
         "tsConfig": "libs/datamanager/tsconfig.lib.json",
         "main": "libs/datamanager/src/index.js",

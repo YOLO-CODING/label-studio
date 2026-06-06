@@ -1,5 +1,6 @@
 import type React from "react";
-import { Modal } from "antd";
+import Modal from "antd/es/modal";
+import "antd/es/modal/style/css";
 import { sanitizeHtml } from "../../utils/html";
 
 export const InstructionsModal = ({

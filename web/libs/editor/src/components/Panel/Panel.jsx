@@ -1,13 +1,13 @@
 import { observer } from "mobx-react";
 import { Button } from "@humansignal/ui";
 import {
-  FullscreenExitOutlined,
-  FullscreenOutlined,
-  RedoOutlined,
-  RollbackOutlined,
-  SettingOutlined,
-  UndoOutlined,
-} from "@ant-design/icons";
+  PiArrowsOutSimple,
+  PiArrowsInSimple,
+  PiArrowCounterClockwise,
+  PiArrowClockwise,
+  PiArrowUUpLeft,
+  PiGear,
+} from "react-icons/pi";
 
 import styles from "./Panel.module.scss";
 import Hint from "../Hint/Hint";
@@ -33,7 +33,7 @@ export default observer(({ store }) => {
       <div className={classname}>
         <Button
           look="string"
-          leading={<UndoOutlined />}
+          leading={<PiArrowCounterClockwise size={16} />}
           disabled={!history?.canUndo}
           onClick={(ev) => {
             annotation?.undo();
@@ -47,7 +47,7 @@ export default observer(({ store }) => {
         <Button
           look="string"
           disabled={!history?.canRedo}
-          leading={<RedoOutlined />}
+          leading={<PiArrowClockwise size={16} />}
           onClick={(ev) => {
             annotation?.redo();
             ev.preventDefault();
@@ -59,7 +59,7 @@ export default observer(({ store }) => {
         <Button
           type="ghost"
           disabled={!history?.canUndo}
-          icon={<RollbackOutlined />}
+          icon={<PiArrowUUpLeft size={16} />}
           onClick={() => {
             history && history.reset();
           }}
@@ -113,7 +113,7 @@ export default observer(({ store }) => {
 
         <Button
           variant="neutral"
-          leading={<SettingOutlined />}
+          leading={<PiGear size={16} />}
           onClick={(ev) => {
             store.toggleSettings();
             ev.preventDefault();
@@ -123,7 +123,7 @@ export default observer(({ store }) => {
         <Button
           className="lsf-fs"
           variant="neutral"
-          leading={store.settings.fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+          leading={store.settings.fullscreen ? <PiArrowsOutSimple size={16} /> : <PiArrowsInSimple size={16} />}
           onClick={(ev) => {
             store.settings.toggleFullscreen();
             ev.preventDefault();

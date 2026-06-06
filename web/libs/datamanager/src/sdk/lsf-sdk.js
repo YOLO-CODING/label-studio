@@ -742,6 +742,7 @@ export class LSFWrapper {
   };
 
   needsDraftSave = (annotation) => {
+    if (!annotation) return false;
     if (annotation.history?.hasChanges && !annotation.draftSaved) return true;
     if (
       annotation.history?.hasChanges &&

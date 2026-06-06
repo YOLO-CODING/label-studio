@@ -11,7 +11,7 @@ import styles from "./ImageView.module.scss";
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
 import { chunks, findClosestParent } from "../../utils/utilities";
 import Konva from "konva";
-import { LoadingOutlined } from "@ant-design/icons";
+import { ImSpinner2 } from "react-icons/im";
 import { Toolbar } from "../Toolbar/Toolbar";
 import { ImageViewProvider } from "./ImageViewContext";
 import { Hotkey } from "../../core/Hotkey";
@@ -313,16 +313,20 @@ const SelectionLayer = observer(({ item, selectionArea }) => {
   const [shift, setShift] = useState(false);
   const isPanTool = item.getToolsManager().findSelectedTool()?.fullName === "ZoomPanTool";
 
-  const dragHandler = (e) => setIsMouseWheelClick(e.buttons === 4);
-
-  const handleKey = (e) => setShift(e.shiftKey);
-
   useEffect(() => {
+    let cancelled = false;
+    const handleKey = (e) => {
+      if (!cancelled) setShift(e.shiftKey);
+    };
+    const dragHandler = (e) => {
+      if (!cancelled) setIsMouseWheelClick(e.buttons === 4);
+    };
     window.addEventListener("keydown", handleKey);
     window.addEventListener("keyup", handleKey);
     window.addEventListener("mousedown", dragHandler);
     window.addEventListener("mouseup", dragHandler);
     return () => {
+      cancelled = true;
       window.removeEventListener("keydown", handleKey);
       window.removeEventListener("keyup", handleKey);
       window.removeEventListener("mousedown", dragHandler);
@@ -517,7 +521,7 @@ const CanvasOverlay = observer(({ item }) => {
     <canvas
       className={styles.overlay}
       ref={(ref) => {
-        item.setOverlayRef(ref);
+        if (isAlive(item)) item.setOverlayRef(ref);
       }}
       style={item.imageTransform}
     />
@@ -1097,7 +1101,7 @@ export default observer(
 
           <div
             ref={(node) => {
-              item.setContainerRef(node);
+              if (isAlive(item)) item.setContainerRef(node);
               this.attachObserver(node);
             }}
             className={containerClassName}
@@ -1148,7 +1152,7 @@ export default observer(
             {/* @todo this is dirty hack; rewrite to proper async waiting for data to load */}
             {stageLoading || !toolsReady ? (
               <div className={styles.loading}>
-                <LoadingOutlined />
+                <ImSpinner2 className="animate-spin" />
               </div>
             ) : imageIsLoaded ? (
               <EntireStage
@@ -1287,6 +1291,7 @@ const ImageLayer = observer(({ item }) => {
 
   // Load image with proper CORS and load event
   useEffect(() => {
+    let cancelled = false;
     if (imageEntity?.downloaded && imageEntity.currentSrc) {
       const img = new window.Image();
       img.crossOrigin = "anonymous";
@@ -1294,11 +1299,16 @@ const ImageLayer = observer(({ item }) => {
       img.width = imageEntity.naturalWidth;
       img.height = imageEntity.naturalHeight;
       img.onload = () => {
-        setLoadedImage(img);
+        if (!cancelled) {
+          setLoadedImage(img);
+        }
       };
     } else {
       setLoadedImage(null);
     }
+    return () => {
+      cancelled = true;
+    };
   }, [imageEntity?.downloaded, imageEntity?.currentSrc]);
 
   const { width, height } = useMemo(() => {
@@ -1336,17 +1346,19 @@ const CursorLayer = observer(({ item, tool }) => {
   useEffect(() => {
     if (!item.stageRef) return;
     const stage = item.stageRef;
+    let cancelled = false;
     const onMouseMove = (e) => {
+      if (cancelled) return;
       const { x, y } = stage.getPointerPosition();
       const { x: deltaX, y: deltaY } = stage.position();
       const { x: scaleX, y: scaleY } = stage.scale();
       setCursorPosition([(x - deltaX) / scaleX, (y - deltaY) / scaleY]);
     };
     const onMouseEnter = () => {
-      setVisible(true);
+      if (!cancelled) setVisible(true);
     };
     const onMouseLeave = () => {
-      setVisible(false);
+      if (!cancelled) setVisible(false);
     };
 
     stage.on("mousemove", onMouseMove);
@@ -1354,6 +1366,7 @@ const CursorLayer = observer(({ item, tool }) => {
     stage.on("mouseleave", onMouseLeave);
 
     return () => {
+      cancelled = true;
       stage.off("mousemove", onMouseMove);
       stage.off("mouseenter", onMouseEnter);
       stage.off("mouseleave", onMouseLeave);

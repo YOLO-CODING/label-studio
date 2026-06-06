@@ -1,4 +1,5 @@
-import { Table } from "antd";
+import Table from "antd/es/table";
+import "antd/es/table/style/css";
 import { inject, observer } from "mobx-react";
 import { flow, getEnv, types } from "mobx-state-tree";
 import Papa from "papaparse";

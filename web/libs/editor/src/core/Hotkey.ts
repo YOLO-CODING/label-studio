@@ -161,7 +161,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
   const getKeys = (key: string) => {
     const tokenRegex = /((?:\w+\+)*(?:[^,]+|,)),?/g;
 
-    return [...key.replace(/\s/, "").matchAll(tokenRegex)].map((match) => match[1]);
+    return [...key.replace(/\s/g, "").matchAll(tokenRegex)].map((match) => match[1]).filter(Boolean);
   };
 
   const unbind = () => {
@@ -201,10 +201,6 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
      */
     addKey(key: string, func: keymaster.KeyHandler, desc?: string, scope: string = DEFAULT_SCOPE) {
       if (!isDefined(key)) return;
-
-      if (_hotkeys_map[key]) {
-        console.warn(`Key already added: ${key}. It's possibly a bug.`);
-      }
 
       const keyName = this.applyAliases(key.toLowerCase());
 

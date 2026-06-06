@@ -30,33 +30,21 @@ module.exports = {
   },
   transform: {
     "^.+\\.[tj]sx?$": [
-      "babel-jest",
+      "@swc/jest",
       {
-        presets: [
-          [
-            "@babel/preset-react",
-            {
-              runtime: "automatic",
-            },
-          ],
-          "@babel/preset-typescript",
-          [
-            "@babel/preset-env",
-            {
-              targets: {
-                browsers: ["last 2 Chrome versions"],
-                node: "current",
-              },
-            },
-          ],
-        ],
-        plugins: [
-          ["babel-plugin-import", { libraryName: "antd" }],
-          "@babel/plugin-proposal-class-properties",
-          "@babel/plugin-proposal-private-methods",
-          "@babel/plugin-proposal-optional-chaining",
-          "@babel/plugin-proposal-nullish-coalescing-operator",
-        ],
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            tsx: true,
+            decorators: true,
+          },
+          transform: {
+            react: { runtime: "automatic" },
+            legacyDecorator: true,
+            decoratorMetadata: true,
+          },
+          loose: true,
+        },
       },
     ],
   },

@@ -1,4 +1,5 @@
-import { Tag } from "antd";
+import Tag from "antd/es/tag";
+import "antd/es/tag/style/css";
 import { inject, observer } from "mobx-react";
 import { getParent, types } from "mobx-state-tree";
 

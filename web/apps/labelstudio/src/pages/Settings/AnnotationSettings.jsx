@@ -36,7 +36,7 @@ export const AnnotationSettings = () => {
           >
             <Form.Row columnCount={1}>
               <Elem name={"header"}>标注说明</Elem>
-              <div class="settings-description">
+              <div className="settings-description">
                 <p style={{ marginBottom: "0" }}>编写说明以帮助用户完成标注任务。</p>
                 <p style={{ marginTop: "8px" }}>
                    说明字段支持HTML标记语法，您可以在其中嵌入图片、iframe（pdf文档）等多种媒体元素。
@@ -46,7 +46,7 @@ export const AnnotationSettings = () => {
                 <Toggle label="标注前显示说明" name="show_instruction" />
               </div>
               {/* <Elem name={"header"}>Labeling Instructions</Elem> */}
-              {/* <div class="settings-description"> */}
+              {/* <div className="settings-description"> */}
               {/*   <p style={{ marginBottom: "0" }}>Write instructions to help users complete labeling tasks.</p> */}
               {/*   <p style={{ marginTop: "8px" }}> */}
               {/*     The instruction field supports HTML markup and it allows use of images, iframes (pdf). */}

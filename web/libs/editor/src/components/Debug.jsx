@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
-import { Form } from "antd";
+import Form from "antd/es/form";
+import "antd/es/form/style/css";
 import { Button } from "@humansignal/ui";
 
 import { observer } from "mobx-react";

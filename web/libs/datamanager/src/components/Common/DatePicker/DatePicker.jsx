@@ -120,7 +120,7 @@ export const DatePicker = ({
               monthsShown={2}
               selectsRange={selectRange}
               showTimeSelect={showTime}
-              locale="zh_CN"  // 添加这一行
+              locale="zh-CN"
               inline
             />
           </div>

@@ -27,7 +27,6 @@ export const useDraftProject = () => {
         title: projectName,
       },
     });
-    console.log({ draft });
 
     if (draft) setProject(draft);
   }, []);
@@ -36,5 +35,5 @@ export const useDraftProject = () => {
     fetchDraftProject();
   }, []);
 
-  return { project, setProject };
+  return { project: project ?? {}, setProject };
 };

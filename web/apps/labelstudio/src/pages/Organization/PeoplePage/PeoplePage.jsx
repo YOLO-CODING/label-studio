@@ -92,7 +92,6 @@ export const PeoplePage = () => {
       <InviteLink
         opened={invitationOpen}
         onClosed={() => {
-          console.log("hidden");
           setInvitationOpen(false);
         }}
       />

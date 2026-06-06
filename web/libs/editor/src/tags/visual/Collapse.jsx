@@ -1,6 +1,7 @@
 import { getRoot, types } from "mobx-state-tree";
 import { observer } from "mobx-react";
-import { Collapse } from "antd";
+import Collapse from "antd/es/collapse";
+import "antd/es/collapse/style/css";
 
 import Registry from "../../core/Registry";
 import Types from "../../core/Types";

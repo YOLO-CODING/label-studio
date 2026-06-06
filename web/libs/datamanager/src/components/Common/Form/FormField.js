@@ -72,8 +72,6 @@ export const FormField = forwardRef(
         /**@type {HTMLInputElement|HTMLTextAreaElement} */
         const formField = field.current;
 
-        if (!(formField instanceof HTMLElement)) console.log({ formField, value });
-
         if (setValue instanceof Function) {
           setValue(value);
         } else if (formField.type === "checkbox" || formField.type === "radio") {

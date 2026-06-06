@@ -23,12 +23,12 @@ export const RadioGroup = ({ size, value, onChange, children, ...rest }) => {
   );
 };
 
-const RadioButton = ({ value, disabled, children, ...props }) => {
+const RadioButton = React.forwardRef(({ value, disabled, children, ...props }, ref) => {
   const { onChange, value: currentValue } = React.useContext(RadioContext);
   const checked = value === currentValue;
 
   return (
-    <Elem {...props} tag="label" name="button" mod={{ checked, disabled }}>
+    <Elem {...props} tag="label" name="button" mod={{ checked, disabled }} ref={ref}>
       <Elem
         name="input"
         tag="input"
@@ -41,6 +41,7 @@ const RadioButton = ({ value, disabled, children, ...props }) => {
       {children}
     </Elem>
   );
-};
+});
+RadioButton.displayName = "RadioButton";
 
 RadioGroup.Button = RadioButton;
