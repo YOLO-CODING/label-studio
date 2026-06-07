@@ -97,7 +97,8 @@ class PlanListAPI(generics.ListCreateAPIView):
 
     def filter_queryset(self, queryset):
         return queryset.filter(
-            organization=self.request.user.active_organization
+            organization=self.request.user.active_organization,
+            cancelled=False
         )
 
     def get(self, request, *args, **kwargs):
@@ -150,14 +151,19 @@ class PlanAPI(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Plan.objects.filter(
-            organization=self.request.user.active_organization
+            organization=self.request.user.active_organization,
+            cancelled=False
         )
 
     def retrieve(self, request, *args, **kwargs):
         return super(PlanAPI, self).retrieve(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        return super(PlanAPI, self).destroy(request, *args, **kwargs)
+        plan = self.get_object()
+        plan.cancelled = True
+        plan.cancelled_at = now()
+        plan.save()
+        return Response(status=status.HTTP_200_OK)
 
     def partial_update(self, request, *args, **kwargs):
         return super(PlanAPI, self).partial_update(request, *args, **kwargs)
@@ -231,6 +237,10 @@ class PlanAPI(viewsets.ModelViewSet):
         user_imgsz = request.data.get('imgsz')
         if user_imgsz and user_imgsz > 100:
             plan.imgsz = user_imgsz
+
+        user_training_config = request.data.get('training_config')
+        if user_training_config:
+            plan.training_config = user_training_config
 
         plan.status = Plan.STATUS_CONFIRMED
         plan.updated_at = now()

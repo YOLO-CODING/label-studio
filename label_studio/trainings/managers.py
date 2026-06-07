@@ -56,6 +56,8 @@ def emojis(string=""):
 class YoloTrainingManager(object):
     def __init__(self, label_type, working_dir, dataset_entry, last_weight, imgsz, plan):
         self.label_type = label_type or "RectangleLabels"
+        self.training_config = self._parse_training_config(plan)
+
         model_scale = self.training_config.get('model', 'n')
         if label_type == "PolygonLabels":
             self.initial_model = f"yolo26{model_scale}-seg.yaml"
@@ -72,8 +74,6 @@ class YoloTrainingManager(object):
             self.batch_no = plan.batch_last
         else:
             self.batch_no = 1
-
-        self.training_config = self._parse_training_config(plan)
 
         self.training_device = self.training_config.get('device', settings.YOLO_TRAIN_DEVICE)
         self.training_batch = self.training_config.get('batch_size', settings.YOLO_TRAIN_BATCH)
