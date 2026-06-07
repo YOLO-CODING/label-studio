@@ -39,64 +39,35 @@ export const ProjectsPage = () => {
 
   const fetchProjects = async (page = currentPage, pageSize = defaultPageSize) => {
     setNetworkState("loading");
-    abortController.renew(); // Cancel any in flight requests
-
-    const requestParams = { page, page_size: pageSize };
-
-    requestParams.include = [
-      "id",
-      "title",
-      "created_by",
-      "created_at",
-      "color",
-      "is_published",
-      "assignment_settings",
-    ].join(",");
+    abortController.renew();
 
     const data = await api.callApi("projects", {
-      params: requestParams,
+      params: {
+        page,
+        page_size: pageSize,
+        include: [
+          "id",
+          "title",
+          "created_by",
+          "created_at",
+          "color",
+          "is_published",
+          "assignment_settings",
+          "description",
+          "task_number",
+          "skipped_annotations_number",
+          "total_annotations_number",
+          "total_predictions_number",
+          "finished_task_number",
+        ].join(","),
+      },
       signal: abortController.controller.current.signal,
       errorFilter: (e) => e.error.includes("aborted"),
     });
 
     setTotalItems(data?.count ?? 1);
-    setProjectsList(data.results ?? []);
+    setProjectsList(data?.results ?? []);
     setNetworkState("loaded");
-
-    if (data?.results?.length) {
-      const additionalData = await api.callApi("projects", {
-        params: {
-          ids: data?.results?.map(({ id }) => id).join(","),
-          include: [
-            "id",
-            "description",
-            "num_tasks_with_annotations",
-            "task_number",
-            "skipped_annotations_number",
-            "total_annotations_number",
-            "total_predictions_number",
-            "ground_truth_number",
-            "finished_task_number",
-          ].join(","),
-          page_size: pageSize,
-        },
-        signal: abortController.controller.current.signal,
-        errorFilter: (e) => e.error.includes("aborted"),
-      });
-
-      if (additionalData?.results?.length) {
-        setProjectsList((prev) =>
-          additionalData.results.map((project) => {
-            const prevProject = prev.find(({ id }) => id === project.id);
-
-            return {
-              ...prevProject,
-              ...project,
-            };
-          }),
-        );
-      }
-    }
   };
 
   const loadNextPage = async (page, pageSize) => {

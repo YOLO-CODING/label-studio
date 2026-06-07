@@ -34,7 +34,7 @@ export const AutoAcceptToggle = injector(
               {suggestions.size > 0 ? (
                 <Space size="small">
                   <Elem name="info">
-                    {suggestions.size} suggestion{suggestions.size > 0 && "s"}
+                    {suggestions.size} 条建议
                   </Elem>
                   <Elem
                     name="action"
@@ -57,7 +57,7 @@ export const AutoAcceptToggle = injector(
                 <Toggle
                   checked={store.autoAcceptSuggestions}
                   onChange={(e) => store.setAutoAcceptSuggestions(e.target.checked)}
-                  label="Auto-Accept Suggestions"
+                  label="自动接受建议"
                 />
               )}
             </Space>
