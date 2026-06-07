@@ -107,6 +107,7 @@ class Plan (PlanMixin, models.Model):
     training_config = models.CharField(_('training_config'), max_length=10000, null=True, blank=True)
     cancelled = models.BooleanField(_('cancelled'), default=False)
     cancelled_at = models.DateTimeField(_('cancelled at'), null=True, blank=True)
+    training_pid = models.IntegerField(_('training_pid'), null=True, blank=True)
     started_at = models.DateTimeField(_('started at'), null=True)
     completed_at = models.DateTimeField(_('completed at'), null=True)
     batch_last = models.IntegerField(_('batch_last'), null=True, default=0)

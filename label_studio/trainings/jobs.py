@@ -56,8 +56,23 @@ def run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_c
     return result.returncode == 0
 
 def failure_handler(job, exc_type, exc_value, traceback):
-    # 自定义失败处理逻辑
+    """自定义失败处理逻辑 - 更新 Plan 状态为 Failed"""
     logging.error(f"Job {job.id} failed with {exc_type}: {exc_value}")
+    
+    # 从 job args 中提取 plan_id
+    if job.args and len(job.args) > 0:
+        plan_id = job.args[0]
+        try:
+            plan = Plan.objects.get(pk=plan_id)
+            plan.status = Plan.STATUS_FAILED
+            plan.failed = True
+            plan.fail_message = f"训练任务异常: {exc_type.__name__}: {str(exc_value)}"
+            plan.save()
+            logging.info(f"Plan {plan_id} marked as failed due to job exception")
+        except Plan.DoesNotExist:
+            logging.error(f"Plan {plan_id} not found when handling failure")
+        except Exception as e:
+            logging.error(f"Error updating plan {plan_id} status: {e}")
 
 @job('q_datasets')
 def prepare_training(plan_id):
@@ -175,7 +190,15 @@ def do_training_first_epochs(plan_id, label_type, working_dir, dataset_entry, ep
         else:
             queue.enqueue(finish_training, plan_id, label_type, working_dir, dataset_entry, epoch_end, best_weight, on_failure=failure_handler)
     except Exception as ex:
-        logging.error("Training failed for plan: %s with type: %s", plan_id, label_type)
+        logging.error("Training failed for plan: %s with type: %s, error: %s", plan_id, label_type, str(ex))
+        try:
+            plan = Plan.objects.get(pk=plan_id)
+            plan.status = Plan.STATUS_FAILED
+            plan.failed = True
+            plan.fail_message = f"训练失败: {str(ex)}"
+            plan.save()
+        except Exception as e:
+            logging.error(f"Error updating plan {plan_id} status: {e}")
 
 
 @job('q_trainings')
@@ -226,7 +249,15 @@ def do_training_epochs(plan_id, label_type, working_dir, dataset_entry, epoch_st
         else:
             queue.enqueue(finish_training, plan_id, label_type, working_dir, dataset_entry, epoch_end, best_weight, on_failure=failure_handler)
     except Exception as ex:
-        logging.error("Training failed for plan: %s with type: %s", plan_id, label_type)
+        logging.error("Training failed for plan: %s with type: %s, error: %s", plan_id, label_type, str(ex))
+        try:
+            plan = Plan.objects.get(pk=plan_id)
+            plan.status = Plan.STATUS_FAILED
+            plan.failed = True
+            plan.fail_message = f"训练失败: {str(ex)}"
+            plan.save()
+        except Exception as e:
+            logging.error(f"Error updating plan {plan_id} status: {e}")
 
 
 @job('q_trainings')
