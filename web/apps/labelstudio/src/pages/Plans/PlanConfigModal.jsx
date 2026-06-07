@@ -30,7 +30,8 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
   const [weightDecay, setWeightDecay] = useState(initialExtraConfig.weight_decay || 0.0005);
 
   const configMode = mode || "";
-  const title = configMode === "confirm" ? "确认" : "配置";
+  const isReadonly = configMode === "readonly";
+  const title = configMode === "confirm" ? "开始训练" : isReadonly ? "查看配置" : "配置";
 
   const latestState = useRef();
   latestState.current = { epochs, imageSize, planId, model, batchSize, lr, optimizer, patience, weightDecay };
@@ -101,13 +102,11 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
   };
 
   const saveConfirm = async () => {
-    const { epochs, imageSize, planId } = latestState.current;
-
     const configData = {
-      epochs: epochs || 10,
-      imgsz: imageSize || 224,
-      id: planId,
-      training_config: buildExtraConfig(),
+      epochs: plan.epochs || 100,
+      imgsz: plan.imgsz || 640,
+      id: plan.id,
+      training_config: plan.training_config || "{}",
     };
 
     const response = await api.callApi("confirmPlan", {
@@ -118,7 +117,7 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
     });
     if (response) {
       if (response.id) {
-        toast.show({ message: "训练计划已确认", type: "info" });
+        toast.show({ message: "训练已开始", type: "info" });
 
         modalRef.current?.hide?.();
 
@@ -126,7 +125,7 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
           onSaved();
         }
       } else {
-        toast.show({ message: `训练计划确认失败：${response.error || ""}`, type: "error" });
+        toast.show({ message: `开始训练失败：${response.error || ""}`, type: "error" });
       }
     }
   };
@@ -180,138 +179,159 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
         <Block name="plan-config-modal">
           {configMode === "confirm" && (
             <Elem name="warp">
-              <Space style={{ fontSize: 20, marginBottom: 20, lineHeight: 1.5 }}>
-                确认后训练任务将立即开始，可以在计划详情页面查看训练进度和日志。
+              <Space style={{ fontSize: 16, marginBottom: 10, lineHeight: 1.5 }}>
+                训练任务将立即开始，可以在计划详情页面查看训练进度和日志。
                 <br />
-                请确认是否提交训练计划?{" "}
+                是否开始训练？
               </Space>
-              <Space style={{ fontSize: 18, marginBottom: 10 }}>请检查下面的训练参数：</Space>
             </Elem>
           )}
-          {(configMode === "edit" || !mode) && (
-            <Elem name="warp">
-              <Space style={{ fontSize: 20, marginBottom: 10, lineHeight: 1.5 }}>修改训练参数： </Space>
-            </Elem>
-          )}
+          {(configMode === "edit" || configMode === "readonly" || !mode) && (
+            <>
+              <Elem name="warp">
+                <Space style={{ fontSize: 20, marginBottom: 10, lineHeight: 1.5 }}>
+                  {isReadonly ? "当前训练参数：" : "修改训练参数： "}
+                </Space>
+              </Elem>
 
-          <Elem name="warp" style={{ padding: 10 }}>
-            <Block name="settings-column">
-              <Label text="训练轮数" size="medium" />
-              <Input
-                name="epochs"
-                type="number"
-                defaultValue={epochs || ""}
-                onChange={handleEpochsChange}
-                min="1"
-                placeholder="请输入训练轮数"
-              />
-            </Block>
-            <Block name="settings-column">
-              <Label text="训练图像尺寸" />
-              <Input
-                name="imageSize"
-                type="number"
-                defaultValue={imageSize || ""}
-                onChange={handleImageSizeChange}
-                min="32"
-                placeholder="请输入图像尺寸"
-              />
-              <Space style={{ display: "inline", marginLeft: 10 }}>范围：320 - 1280， 必需是32的倍数</Space>
-            </Block>
-            <Block name="settings-column">
-              <Label text="YOLO 模型" size="medium" />
-              <Select
-                name="model"
-                options={[
-                  { value: "n", label: "Nano (最快，精度最低)" },
-                  { value: "s", label: "Small" },
-                  { value: "m", label: "Medium" },
-                  { value: "l", label: "Large" },
-                  { value: "x", label: "Xlarge (最慢，精度最高)" },
-                ]}
-                value={model}
-                onChange={handleModelChange}
-              />
-            </Block>
-            <Block name="settings-column">
-              <Label text="批次大小" />
-              <Input
-                name="batchSize"
-                type="number"
-                defaultValue={batchSize || ""}
-                onChange={handleBatchSizeChange}
-                min="1"
-                placeholder="请输入批次大小"
-              />
-            </Block>
-            <Block name="settings-column">
-              <Label text="学习率" />
-              <Input
-                name="lr"
-                type="number"
-                step="0.0001"
-                defaultValue={lr || ""}
-                onChange={handleLrChange}
-                min="0"
-                placeholder="请输入学习率"
-              />
-            </Block>
-            <Block name="settings-column">
-              <Label text="优化器" size="medium" />
-              <Select
-                name="optimizer"
-                options={[
-                  { value: "SGD", label: "SGD" },
-                  { value: "Adam", label: "Adam" },
-                  { value: "AdamW", label: "AdamW" },
-                ]}
-                value={optimizer}
-                onChange={handleOptimizerChange}
-              />
-            </Block>
-            <Block name="settings-column">
-              <Label text="早停轮数" />
-              <Input
-                name="patience"
-                type="number"
-                defaultValue={patience || ""}
-                onChange={handlePatienceChange}
-                min="1"
-                placeholder="请输入早停轮数"
-              />
-            </Block>
-            <Block name="settings-column">
-              <Label text="权重衰减" />
-              <Input
-                name="weightDecay"
-                type="number"
-                step="0.0001"
-                defaultValue={weightDecay || ""}
-                onChange={handleWeightDecayChange}
-                min="0"
-                placeholder="请输入权重衰减"
-              />
-            </Block>
-          </Elem>
+              <Elem name="warp" style={{ padding: 10 }}>
+                <Block name="settings-column">
+                  <Label text="训练轮数" size="medium" />
+                  <Input
+                    name="epochs"
+                    type="number"
+                    defaultValue={epochs || ""}
+                    onChange={handleEpochsChange}
+                    min="1"
+                    placeholder="请输入训练轮数"
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
+                  <Label text="训练图像尺寸" />
+                  <Input
+                    name="imageSize"
+                    type="number"
+                    defaultValue={imageSize || ""}
+                    onChange={handleImageSizeChange}
+                    min="32"
+                    placeholder="请输入图像尺寸"
+                    disabled={isReadonly}
+                  />
+                  <Space style={{ display: "inline", marginLeft: 10 }}>范围：320 - 1280， 必需是32的倍数</Space>
+                </Block>
+                <Block name="settings-column">
+                  <Label text="YOLO 模型" size="medium" />
+                  <Select
+                    name="model"
+                    options={[
+                      { value: "n", label: "Nano (最快，精度最低)" },
+                      { value: "s", label: "Small" },
+                      { value: "m", label: "Medium" },
+                      { value: "l", label: "Large" },
+                      { value: "x", label: "Xlarge (最慢，精度最高)" },
+                    ]}
+                    value={model}
+                    onChange={handleModelChange}
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
+                  <Label text="批次大小" />
+                  <Input
+                    name="batchSize"
+                    type="number"
+                    defaultValue={batchSize || ""}
+                    onChange={handleBatchSizeChange}
+                    min="1"
+                    placeholder="请输入批次大小"
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
+                  <Label text="学习率" />
+                  <Input
+                    name="lr"
+                    type="number"
+                    step="0.0001"
+                    defaultValue={lr || ""}
+                    onChange={handleLrChange}
+                    min="0"
+                    placeholder="请输入学习率"
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
+                  <Label text="优化器" size="medium" />
+                  <Select
+                    name="optimizer"
+                    options={[
+                      { value: "SGD", label: "SGD" },
+                      { value: "Adam", label: "Adam" },
+                      { value: "AdamW", label: "AdamW" },
+                    ]}
+                    value={optimizer}
+                    onChange={handleOptimizerChange}
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
+                  <Label text="早停轮数" />
+                  <Input
+                    name="patience"
+                    type="number"
+                    defaultValue={patience || ""}
+                    onChange={handlePatienceChange}
+                    min="1"
+                    placeholder="请输入早停轮数"
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
+                  <Label text="权重衰减" />
+                  <Input
+                    name="weightDecay"
+                    type="number"
+                    step="0.0001"
+                    defaultValue={weightDecay || ""}
+                    onChange={handleWeightDecayChange}
+                    min="0"
+                    placeholder="请输入权重衰减"
+                    disabled={isReadonly}
+                  />
+                </Block>
+              </Elem>
+            </>
+          )}
         </Block>
       }
       footer={
         <div style={{ position: "relative", fontSize: 16 }}>
-          <div style={{ display: "inline-block", margin: "0 20px" }}>
-            <Button
-              style={{ backgroundColor: "#ffffff", color: "#4c5fa9" }}
-              onClick={() => {
-                modalRef.current?.hide();
-              }}
-            >
-              取消
-            </Button>
-          </div>
-          <div style={{ display: "inline-block", margin: "0 20px" }}>
-            <Button onClick={save} disabled={!epochs || !imageSize || !model}>
-              确定
-            </Button>
-          </div>
+          {isReadonly ? (
+            <div style={{ display: "inline-block", margin: "0 20px" }}>
+              <Button onClick={() => { modalRef.current?.hide(); }}>
+                关闭
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "inline-block", margin: "0 20px" }}>
+                <Button
+                  style={{ backgroundColor: "#ffffff", color: "#4c5fa9" }}
+                  onClick={() => {
+                    modalRef.current?.hide();
+                  }}
+                >
+                  取消
+                </Button>
+              </div>
+              <div style={{ display: "inline-block", margin: "0 20px" }}>
+                <Button onClick={save} disabled={configMode === "edit" && (!epochs || !imageSize || !model)}>
+                  {configMode === "confirm" ? "开始训练" : "保存"}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       }
       style={{ width: 750 }}

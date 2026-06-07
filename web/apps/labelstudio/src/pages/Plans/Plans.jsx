@@ -105,48 +105,20 @@ export const PlansPage = () => {
 
   const cancelPlan = async (plan) => {
     confirm({
-      title: "操作确认",
-      body: "您即将执行撤销操作。此操作不可回退，请谨慎操作。",
-      okText: "继续",
+      title: "删除训练计划",
+      body: "删除后，该训练计划将被取消且无法恢复。已生成的训练数据和模型文件不会被删除。",
+      okText: "确认删除",
+      cancelText: "取消",
       buttonLook: "negative",
       onOk: async () => {
         try {
-          const response = await api.callApi("cancelPlan", {
+          await api.callApi("deletePlan", {
             params: {
               pk: plan.id,
             },
           });
-          if (response) {
-            toast.show({ message: "训练计划已撤销", type: "info" });
-            history.go(0);
-            return;
-          }
-        } catch (error) {
-          console.error("Error to cancel plan", error);
-          toast.show({ message: "训练计划撤销失败", type: "error" });
-        }
-      },
-    });
-  };
-
-  const deletePlan = async (plan) => {
-    confirm({
-      title: "操作确认",
-      body: "您即将执行删除操作。记录会直接删除，请谨慎操作。",
-      okText: "继续",
-      buttonLook: "negative",
-      onOk: async () => {
-        try {
-          const response = await api.callApi("deletePlan", {
-            params: {
-              pk: plan.id,
-            },
-          });
-          if (response) {
-            toast.show({ message: "训练计划已删除", type: "info" });
-            history.go(0);
-            return;
-          }
+          toast.show({ message: "训练计划已删除", type: "info" });
+          history.go(0);
         } catch (error) {
           console.error("Error to delete plan", error);
           toast.show({ message: "训练计划删除失败", type: "error" });
@@ -253,7 +225,7 @@ export const PlansPage = () => {
               </Link>
             </button>
 
-            {info.row.original.status < 2 && !info.row.original.cancelled && (
+            {!info.row.original.cancelled && (
               <>
                 <button
                   className={styles.planViewButton}
@@ -280,24 +252,14 @@ export const PlansPage = () => {
                   }}
                 >
                   <IoCheckmarkCircle />
-                  确认
+                  开始训练
                 </button>
               </>
             )}
 
-            {(info.row.original.status < 3 || info.row.original.failed) && !info.row.original.cancelled && (
+            {!info.row.original.cancelled && info.row.original.status !== 4 && (
               <>
-                <button className={styles.cancelButton} onClick={() => cancelPlan(info.row.original)}>
-                  <RiShareForwardFill />
-                  撤销
-                </button>
-              </>
-            )}
-
-            {/* 撤销的和完成的可以删除 */}
-            {(info.row.original.status == 9 || info.row.original.cancelled) && (
-              <>
-                <button className={styles.deleteButton} onClick={() => deletePlan(info.row.original)}>
+                <button className={styles.deleteButton} onClick={() => cancelPlan(info.row.original)}>
                   <RiDeleteBin6Line />
                   删除
                 </button>
@@ -391,7 +353,7 @@ export const PlansPage = () => {
         <PlanConfigModal
           key={`edit-${currentPlan.id}`}
           opened={isEditOpen}
-          mode="edit"
+          mode={currentPlan.status >= 2 ? "readonly" : "edit"}
           plan={currentPlan}
           onClosed={() => {
             setIsEditOpen(false);
