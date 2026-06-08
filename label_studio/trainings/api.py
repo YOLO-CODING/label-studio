@@ -183,7 +183,7 @@ class TrainingModelDeployAPI(APIView):
                     url='http://localhost:9090',
                     defaults={
                         'title': f'YOLO预标注 - {target_filename}',
-                        'interactive': True,
+                        'is_interactive': True,
                     }
                 )
                 

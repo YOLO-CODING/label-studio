@@ -133,9 +133,12 @@ export const TrainedModelsPage = () => {
   }
 
   const deployModel = async (m) => {
+    const projectId = m.plan?.project_id;
+    const projectName = m.plan?.project_title || '源项目';
+    
     confirm({
       title: "模型部署",
-      body: `即将部署模型到 ML Backend。模型将自动复制到 ML Backend 目录，并配置到 Project ${m.plan?.project_id || '(源项目)'}。`,
+      body: `即将部署模型到 ML Backend，并配置到项目 "${projectName}" (Project ${projectId || '未知'})。\n\n部署后可以在项目的 Data Manager 中触发预标注。`,
       okText: "确认部署",
       buttonLook: "positive",
       onOk: async () => {
@@ -145,25 +148,24 @@ export const TrainedModelsPage = () => {
               pk: m.id
             },
             body: {
-              project_id: m.plan?.project_id
+              project_id: projectId
             }
           });
           
           if (response) {
             toast.show({ 
-              message: `模型已成功部署到 Project ${response.project_title}`, 
-              type: ToastType.success,
-              duration: 5000
+              message: `模型已成功部署到 ${response.project_title}`, 
+              type: "success"
             });
             fetchModels(currentPage, currentPageSize);
             return;
           }
         } catch (error) {
-          console.error("Error to deploy model", error);
-          const errorMsg = error?.response?.data?.error || "模型部署失败";
+          console.error("部署失败:", error);
+          const errorMsg = error?.response?.data?.error || error?.message || "模型部署失败，请检查后端日志";
           toast.show({ 
             message: errorMsg, 
-            type: ToastType.error,
+            type: "error",
             duration: 10000
           });
         }
