@@ -23,9 +23,9 @@ export const PlansPage = () => {
 
   const [plansList, setPlansList] = useState([]);
   const [currentPage, setCurrentPage] = usePage("page", 1);
-  const [currentPageSize, setCurrentPageSize] = usePageSize("page_size", 20);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
+  const fixedPageSize = 10;
 
   // 配置弹出框
   const [currentPlan, setCurrentPlan] = useState({});
@@ -128,8 +128,8 @@ export const PlansPage = () => {
   };
 
   useEffect(() => {
-    fetchPlans(currentPage, currentPageSize);
-  }, []);
+    fetchPlans(currentPage, fixedPageSize);
+  }, [currentPage]);
 
   // 格式化时间
   const formatDateTime = (dateString) => {
@@ -177,8 +177,8 @@ export const PlansPage = () => {
         header: "文件数量",
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor("created_at", {
-        header: "提交时间",
+      columnHelper.accessor("updated_at", {
+        header: "更新时间",
         cell: (info) => formatDateTime(info.getValue()),
       }),
       columnHelper.accessor("epochs", {
@@ -309,21 +309,20 @@ export const PlansPage = () => {
               ))}
             </tbody>
           </table>
-          <Pagination
-            page={currentPage}
-            urlParamName="page"
-            totalItems={totalItems}
-            pageSize={currentPageSize}
-            // pageSizeOptions={[20, 30, 50, 100, 2]}
-            onPageLoad={fetchPlans}
-            onChange={(newPage, newPageSize) => {
-              // console.log('Pagination onChange:', { newPage, newPageSize });
-              // 更新状态，触发 useEffect 重新获取数据
-              setCurrentPage(newPage);
-              setCurrentPageSize(newPageSize);
-            }}
-            style={{ paddingTop: 16 }}
-          />
+          <div className={styles.paginationWrapper}>
+            <Pagination
+              name="plans-list"
+              label="训练任务"
+              page={currentPage}
+              urlParamName="page"
+              totalItems={totalItems}
+              pageSize={fixedPageSize}
+              onPageLoad={(page) => fetchPlans(page, fixedPageSize)}
+              onChange={(newPage) => {
+                setCurrentPage(newPage);
+              }}
+            />
+          </div>
         </>
       )}
 

@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 (
                     "updated_at",
                     models.DateTimeField(
-                        auto_now=True, null=True, verbose_name="updated at"
+                        auto_now=True, db_index=True, null=True, verbose_name="updated at"
                     ),
                 ),
                 ("project_id", models.PositiveIntegerField(verbose_name="project id")),
@@ -186,7 +186,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "ordering": ("-created_at",),
+                "ordering": ("-updated_at",),
             },
             bases=(plans.mixins.PlanMixin, models.Model),
         ),

@@ -31,7 +31,8 @@ def run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_c
     env['MKL_NUM_THREADS'] = '1'
     env['OPENBLAS_NUM_THREADS'] = '1'
     env['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
-    env['CUDA_VISIBLE_DEVICES'] = ''
+    # Allow GPU configuration from environment variable (default: disabled for macOS compatibility)
+    env.setdefault('CUDA_VISIBLE_DEVICES', os.environ.get('CUDA_VISIBLE_DEVICES', ''))
     env['PYTORCH_MPS_DISABLE'] = '1'
     env['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = 'YES'
     env['DJANGO_SETTINGS_MODULE'] = 'core.settings.label_studio'
@@ -52,8 +53,21 @@ def run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_c
     ]
     
     logging.info(f"Running YOLO training subprocess: {' '.join(cmd)}")
-    result = subprocess.run(cmd, env=env, cwd=base_dir, capture_output=False)
-    return result.returncode == 0
+    process = subprocess.Popen(cmd, env=env, cwd=base_dir)
+    
+    # Update Plan with PID and initial heartbeat
+    try:
+        plan = Plan.objects.get(pk=plan_id)
+        plan.training_pid = process.pid
+        plan.last_heartbeat = now()
+        plan.save(update_fields=['training_pid', 'last_heartbeat'])
+        logging.info(f"Plan {plan_id} training started with PID {process.pid}")
+    except Exception as e:
+        logging.error(f"Failed to update PID for plan {plan_id}: {e}")
+    
+    # Wait for process to complete
+    process.wait()
+    return process.returncode == 0
 
 def failure_handler(job, exc_type, exc_value, traceback):
     """自定义失败处理逻辑 - 更新 Plan 状态为 Failed"""

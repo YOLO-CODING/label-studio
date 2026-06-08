@@ -74,21 +74,13 @@ _plan_schema = {
     }
 }
 class PlanListPagination(PageNumberPagination):
-    page_size = 20
-    page_size_query_param = 'page_size'
-
-    def get_page_size(self, request):
-        # emulate "unlimited" page_size
-        if (
-                self.page_size_query_param in request.query_params
-                and request.query_params[self.page_size_query_param] == '-1'
-        ):
-            return 100
-        return super().get_page_size(request)
+    page_size = 10
+    max_page_size = 10
+    page_size_query_param = None
 
 
 class PlanListAPI(generics.ListCreateAPIView):
-    queryset = Plan.objects.all()
+    queryset = Plan.objects.all().order_by('-updated_at')
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     permission_required = ViewClassPermission(
     )

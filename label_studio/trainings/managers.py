@@ -14,6 +14,7 @@ from ultralytics.utils.files import WorkingDirectory
 from ultralytics.utils import LOGGER as YOLO_LOGGER
 
 from plans.models import (
+    Plan,
     TrainingEpochs
 )
 
@@ -92,11 +93,21 @@ class YoloTrainingManager(object):
         self.log_file_handler.setLevel(logging.DEBUG)
         self.log_file_handler.setFormatter(PrefixFormatter("%(message)s"))
 
-    def _parse_training_config(self, plan):
-        try:
-            return json.loads(plan.training_config or '{}')
-        except Exception:
-            return {}
+def _parse_training_config(self, plan):
+    try:
+        return json.loads(plan.training_config or '{}')
+    except Exception:
+        return {}
+
+def _update_heartbeat(self, trainer):
+    """Callback to update heartbeat after each epoch"""
+    try:
+        if self.plan:
+            self.plan.last_heartbeat = now()
+            self.plan.save(update_fields=['last_heartbeat'])
+            logging.info(f"Heartbeat updated for plan {self.plan.id}")
+    except Exception as e:
+        logging.error(f"Failed to update heartbeat for plan {self.plan.id}: {e}")
 
     def is_failed(self):
         return self.failed
@@ -121,6 +132,9 @@ class YoloTrainingManager(object):
             YOLO_LOGGER.addHandler(self.log_file_handler)
 
             model = YOLO(self.initial_model)
+
+            # Add heartbeat callback for zombie detection
+            model.add_callback('on_fit_epoch_end', self._update_heartbeat)
 
             # prepare epoch training
             epoch_name = "epoch-1"
@@ -243,6 +257,9 @@ class YoloTrainingManager(object):
             YOLO_LOGGER.addHandler(self.log_file_handler)
 
             model = YOLO(self.last_weight)
+
+            # Add heartbeat callback for zombie detection
+            model.add_callback('on_fit_epoch_end', self._update_heartbeat)
 
             epoch_name = "epoch-{}".format(epoch_start + 1)
             epoch_dir = os.path.join(self.working_dir, "runs", model.task, self.project_train, epoch_name)

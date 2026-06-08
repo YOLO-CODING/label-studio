@@ -15,7 +15,8 @@ if base_dir not in sys.path:
 # Set environment variables BEFORE any imports
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings.label_studio")
 os.environ.setdefault("DJANGO_DB", "sqlite")
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+# Allow GPU configuration from parent process environment (default: disabled for macOS compatibility)
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
 os.environ["PYTORCH_MPS_DISABLE"] = "1"
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 os.environ["OBJC_DISABLE_INITIALIZE_FORK_SAFETY"] = "YES"

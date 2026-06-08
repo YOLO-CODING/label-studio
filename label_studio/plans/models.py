@@ -84,7 +84,7 @@ class Plan (PlanMixin, models.Model):
         verbose_name=_('created by'),
     )
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('updated at'), null=True, auto_now=True)
+    updated_at = models.DateTimeField(_('updated at'), null=True, auto_now=True, db_index=True)
 
     project_id = models.PositiveIntegerField(_('project id'), null=False)
     project_title = models.CharField(_('project title'), null=True, max_length=255)
@@ -108,6 +108,7 @@ class Plan (PlanMixin, models.Model):
     cancelled = models.BooleanField(_('cancelled'), default=False)
     cancelled_at = models.DateTimeField(_('cancelled at'), null=True, blank=True)
     training_pid = models.IntegerField(_('training_pid'), null=True, blank=True)
+    last_heartbeat = models.DateTimeField(_('last heartbeat'), null=True, blank=True)
     started_at = models.DateTimeField(_('started at'), null=True)
     completed_at = models.DateTimeField(_('completed at'), null=True)
     batch_last = models.IntegerField(_('batch_last'), null=True, default=0)
@@ -149,7 +150,7 @@ class Plan (PlanMixin, models.Model):
         return False
 
     class Meta:
-        ordering = ('-created_at',)
+        ordering = ('-updated_at',)
 
 
 class PlanRecords (models.Model):
