@@ -64,7 +64,15 @@ class TrainingEpochsSerializer(FlexFieldsModelSerializer):
         model = TrainingEpochs
         fields = '__all__'
 
+class PlanBasicSerializer(FlexFieldsModelSerializer):
+    """Basic serializer for Plan info in TrainingModels"""
+    class Meta:
+        model = Plan
+        fields = ['id', 'project_id', 'project_title']
+
 class TrainingModelsSerializer(FlexFieldsModelSerializer):
+    plan = PlanBasicSerializer(read_only=True)
+    
     class Meta:
         model = TrainingModels
         fields = '__all__'
