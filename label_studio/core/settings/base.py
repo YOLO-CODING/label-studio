@@ -533,6 +533,10 @@ os.makedirs(TRAINING_DIR, exist_ok=True)
 TRAINING_MODEL_DIR = os.path.join(BASE_DATA_DIR, 'training-model')
 os.makedirs(TRAINING_MODEL_DIR, exist_ok=True)
 
+# ML Backend model deployment directory (for serving models to prediction backend)
+ML_BACKEND_MODEL_DIR = get_env('ML_BACKEND_MODEL_DIR', os.path.join(BASE_DATA_DIR, 'ml-backend-models'))
+os.makedirs(ML_BACKEND_MODEL_DIR, exist_ok=True)
+
 # file / task size limits
 DATA_UPLOAD_MAX_MEMORY_SIZE = int(get_env('DATA_UPLOAD_MAX_MEMORY_SIZE', 250 * 1024 * 1024))
 DATA_UPLOAD_MAX_NUMBER_FILES = int(get_env('DATA_UPLOAD_MAX_NUMBER_FILES', 999))

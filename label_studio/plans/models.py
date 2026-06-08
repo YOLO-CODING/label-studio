@@ -218,6 +218,11 @@ class TrainingModels (models.Model):
     model_kind = models.CharField(_('model kind'), max_length=255, null=False)
     path = models.CharField(_('path'), max_length=255, null=False)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a record was updated')
+    
+    deployed = models.BooleanField(_('deployed'), default=False)
+    deployed_at = models.DateTimeField(_('deployed at'), null=True, blank=True)
+    deployed_path = models.CharField(_('deployed path'), max_length=500, null=True, blank=True)
+    deployed_to_project = models.IntegerField(_('deployed to project'), null=True, blank=True)
 
     plan = models.ForeignKey(
         'plans.Plan', on_delete=models.CASCADE, null=True

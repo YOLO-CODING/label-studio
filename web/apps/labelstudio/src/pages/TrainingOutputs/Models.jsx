@@ -11,7 +11,7 @@ import { usePage, usePageSize } from "../../components/Pagination/Pagination";
 import { useAPI } from "../../providers/ApiProvider";
 import { Button, buttonVariant, ToastContext, ToastType } from "@humansignal/ui";
 import { HiClipboardCopy } from "react-icons/hi";
-import { RiDeleteBin6Line } from "react-icons/ri";
+import { RiDeleteBin6Line, RiUploadCloud2Line } from "react-icons/ri";
 import styles from "./Models.scss"
 // import {mockTrainedModels}  from './mock.js'
 import Empty  from './Empty'
@@ -132,6 +132,45 @@ export const TrainedModelsPage = () => {
     });
   }
 
+  const deployModel = async (m) => {
+    confirm({
+      title: "模型部署",
+      body: `即将部署模型到 ML Backend。模型将自动复制到 ML Backend 目录，并配置到 Project ${m.plan?.project_id || '(源项目)'}。`,
+      okText: "确认部署",
+      buttonLook: "positive",
+      onOk: async () => {
+        try {
+          const response = await api.callApi('deployTrainingModel', {
+            params: {
+              pk: m.id
+            },
+            body: {
+              project_id: m.plan?.project_id
+            }
+          });
+          
+          if (response) {
+            toast.show({ 
+              message: `模型已成功部署到 Project ${response.project_title}`, 
+              type: ToastType.success,
+              duration: 5000
+            });
+            fetchModels(currentPage, currentPageSize);
+            return;
+          }
+        } catch (error) {
+          console.error("Error to deploy model", error);
+          const errorMsg = error?.response?.data?.error || "模型部署失败";
+          toast.show({ 
+            message: errorMsg, 
+            type: ToastType.error,
+            duration: 10000
+          });
+        }
+      }
+    });
+  }
+
   useEffect(() => {
     fetchModels(currentPage, currentPageSize);
   }, [currentPage, currentPageSize]); // 添加依赖项
@@ -201,27 +240,55 @@ export const TrainedModelsPage = () => {
         cell: info => info.getValue() ? formatDateTime(info.getValue()) : '-',
         size: 180,
       }),
+      columnHelper.accessor('deployed', {
+        header: '部署状态',
+        cell: (info) => {
+          const deployed = info.getValue();
+          const deployedAt = info.row.original.deployed_at;
+          const deployedToProject = info.row.original.deployed_to_project;
+          
+          if (deployed) {
+            return (
+              <div style={{ color: '#52c41a' }}>
+                <span>已部署</span>
+                {deployedToProject && (
+                  <span style={{ fontSize: '12px', marginLeft: '4px', color: '#8c8c8c' }}>
+                    (Project {deployedToProject})
+                  </span>
+                )}
+              </div>
+            );
+          }
+          return <span style={{ color: '#8c8c8c' }}>未部署</span>;
+        },
+        size: 150,
+      }),
       columnHelper.display({
         header: '操作',
         cell: (info) => (
           <div style={{ display: 'flex', gap: '8px' }}>
-            {/* 可以在这里添加其他操作按钮 */}
-
+            {/* 部署操作 */}
+            {!info.row.original.deployed && (
+              <button 
+                className={styles.deployButton}
+                onClick={() => deployModel(info.row.original)}
+              >
+                <RiUploadCloud2Line />部署
+              </button>
+            )}
+            
             {/* 删除操作 */}
-            {  true && (
-                <>
-                  <button 
-                    className={styles.deleteButton}
-                    onClick={() => deleteModel(info.row.original) }
-                  >
-                    <RiDeleteBin6Line />删除
-                  </button>
-                </>
-              )}
-
+            {true && (
+              <button 
+                className={styles.deleteButton}
+                onClick={() => deleteModel(info.row.original)}
+              >
+                <RiDeleteBin6Line />删除
+              </button>
+            )}
           </div>
         ),
-        size: 100,
+        size: 150,
       })
     ],
     [copiedPath] // 添加依赖项
