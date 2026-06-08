@@ -11,7 +11,7 @@ import { usePage, usePageSize } from "../../components/Pagination/Pagination";
 import { useAPI } from "../../providers/ApiProvider";
 import { Button, buttonVariant, ToastContext, ToastType } from "@humansignal/ui";
 import { HiClipboardCopy } from "react-icons/hi";
-import { RiDeleteBin6Line, RiUploadCloud2Line } from "react-icons/ri";
+import { RiDeleteBin6Line, RiShareForwardFill } from "react-icons/ri";
 import styles from "./Models.scss"
 // import {mockTrainedModels}  from './mock.js'
 import Empty  from './Empty'
@@ -273,7 +273,7 @@ export const TrainedModelsPage = () => {
                 className={styles.deployButton}
                 onClick={() => deployModel(info.row.original)}
               >
-                <RiUploadCloud2Line />部署
+                <RiShareForwardFill />部署
               </button>
             )}
             
