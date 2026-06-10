@@ -61,13 +61,15 @@
     display: inline-flex;
     align-items: center;
     justify-content: space-around;
-    width: 50px;
+    min-width: 50px;
+    width: auto;
     background-color: #cc5e46;
     color: #ffffff;
     border: 1px solid #cc5e46;
     font-size: 11px;
     border-radius: 5px;
-    padding: 5px;
+    padding: 5px 8px;
+    white-space: nowrap;
   
   &:hover {
     opacity: .95;
@@ -78,13 +80,100 @@
   display: inline-flex;
   align-items: center;
   justify-content: space-around;
-  width: 60px;
-  background-color: #1890ff;
-  color: #ffffff;
-  border: 1px solid #1890ff;
+  min-width: 60px;
+  width: auto;
+  background-color: #ffffff;
+  color: #4c5fa9;
+  border: 1px solid #4c5fa9;
   font-size: 11px;
   border-radius: 5px;
-  padding: 5px;
+  padding: 5px 8px;
+  white-space: nowrap;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+.cancelDeployButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  width: auto;
+  background-color: #6c757d;
+  color: #ffffff;
+  border: 1px solid #6c757d;
+  font-size: 11px;
+  border-radius: 5px;
+  padding: 5px 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+// 部署Modal样式
+.deployModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.deployModal {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    color: #212529;
+  }
+}
+
+.projectSelect {
+  cursor: pointer;
+  
+  &:focus {
+    border-color: #4c5fa9;
+  }
+}
+
+.cancelDeployModalButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #4c5fa9;
+  border: 1px solid #4c5fa9;
+  cursor: pointer;
+  
+  &:hover {
+    opacity: .95;
+  }
+}
+
+.confirmDeployModalButton {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  background-color: #4c5fa9;
+  color: #ffffff;
+  border: 1px solid #4c5fa9;
+  cursor: pointer;
   
   &:hover {
     opacity: .95;

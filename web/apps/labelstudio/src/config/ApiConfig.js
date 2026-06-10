@@ -109,6 +109,7 @@ export const API_CONFIG = {
     trainingEpochs: "GET:/plans/:pk/training-epochs",
     trainedModels: "GET:/trainings/models",
     deployTrainingModel: "POST:/trainings/models/:pk/deploy/",
+    cancelTrainingModelDeploy: "POST:/trainings/models/:pk/cancel-deploy/",
     deleteTrainingModel: "DELETE:/trainings/models/:pk"
 
   },
