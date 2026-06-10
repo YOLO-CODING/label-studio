@@ -196,6 +196,22 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
 
               <Elem name="warp" style={{ padding: 10 }}>
                 <Block name="settings-column">
+                  <Label text="训练模型" size="medium" />
+                  <Select
+                    name="model"
+                    options={[
+                      { value: "n", label: "Nano (最快，精度最低)" },
+                      { value: "s", label: "Small" },
+                      { value: "m", label: "Medium" },
+                      { value: "l", label: "Large" },
+                      { value: "x", label: "Xlarge (最慢，精度最高)" },
+                    ]}
+                    value={model}
+                    onChange={handleModelChange}
+                    disabled={isReadonly}
+                  />
+                </Block>
+                <Block name="settings-column">
                   <Label text="训练轮数" size="medium" />
                   <Input
                     name="epochs"
@@ -219,22 +235,6 @@ export default function PlanConfigModal({ opened, onOpened, onClosed, onSaved, p
                     disabled={isReadonly}
                   />
                   <Space style={{ display: "inline", marginLeft: 10 }}>范围：320 - 1280， 必需是32的倍数</Space>
-                </Block>
-                <Block name="settings-column">
-                  <Label text="YOLO 模型" size="medium" />
-                  <Select
-                    name="model"
-                    options={[
-                      { value: "n", label: "Nano (最快，精度最低)" },
-                      { value: "s", label: "Small" },
-                      { value: "m", label: "Medium" },
-                      { value: "l", label: "Large" },
-                      { value: "x", label: "Xlarge (最慢，精度最高)" },
-                    ]}
-                    value={model}
-                    onChange={handleModelChange}
-                    disabled={isReadonly}
-                  />
                 </Block>
                 <Block name="settings-column">
                   <Label text="批次大小" />
