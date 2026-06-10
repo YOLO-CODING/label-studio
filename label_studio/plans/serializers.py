@@ -7,7 +7,8 @@ from plans.models import (
     Plan,
     PlanRecords,
     TrainingEpochs,
-    TrainingModels
+    TrainingModels,
+    DeploymentHistory
 )
 from plans.validation import PlanValidator
 from rest_framework.fields import SerializerMethodField
@@ -70,8 +71,15 @@ class PlanBasicSerializer(FlexFieldsModelSerializer):
         model = Plan
         fields = ['id', 'project_id', 'project_title']
 
+class DeploymentHistorySerializer(FlexFieldsModelSerializer):
+    """Serializer for deployment history"""
+    class Meta:
+        model = DeploymentHistory
+        fields = ['id', 'project_id', 'project_title', 'deployed_at', 'deployed_path']
+
 class TrainingModelsSerializer(FlexFieldsModelSerializer):
     plan = PlanBasicSerializer(read_only=True)
+    deployment_history = DeploymentHistorySerializer(read_only=True, many=True)
     
     class Meta:
         model = TrainingModels

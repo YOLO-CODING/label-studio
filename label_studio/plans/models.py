@@ -230,3 +230,41 @@ class TrainingModels (models.Model):
 
     def has_permission(self, user):
         return self.plan.organization == user.active_organization
+    
+    class Meta:
+        verbose_name = _('training model')
+        verbose_name_plural = _('training models')
+
+
+class DeploymentHistory(models.Model):
+    """部署历史记录 - 一个模型可以部署到多个项目"""
+    id = models.AutoField(
+        auto_created=True,
+        primary_key=True,
+        serialize=False,
+        verbose_name='ID',
+        db_index=True,
+    )
+    training_model = models.ForeignKey(
+        'plans.TrainingModels', 
+        on_delete=models.CASCADE,
+        related_name='deployment_history',
+        verbose_name=_('training model')
+    )
+    project_id = models.PositiveIntegerField(_('project id'), null=False)
+    project_title = models.CharField(_('project title'), max_length=255, null=True, blank=True)
+    deployed_at = models.DateTimeField(_('deployed at'), auto_now_add=True)
+    deployed_path = models.CharField(_('deployed path'), max_length=500, null=True, blank=True)
+    deployed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_('deployed by'),
+    )
+    
+    class Meta:
+        verbose_name = _('deployment history')
+        verbose_name_plural = _('deployment histories')
+        ordering = ['-deployed_at']
+        unique_together = [['project_id']]  # 一个项目只能有一条部署记录（一个模型）
