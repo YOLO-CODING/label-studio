@@ -288,11 +288,23 @@ def finish_training(plan_id, label_type, working_dir, dataset_entry, epoch_end:i
 
     models_dir = os.path.join(settings.TRAINING_MODEL_DIR, str(plan_id))
     os.makedirs(models_dir, exist_ok=True)
-    models_file = os.path.join(models_dir, "training-model.pt")
-    if os.path.exists(models_file):
-        os.remove(models_file)
+    
+    # Determine model kind
+    if label_type == "PolygonLabels":
+        model_kind = "segment"
+    else:
+        model_kind = "detect"
+    
+    # Generate unique model filename
+    model_filename = f"plan{plan_id}-{model_kind}-batch{plan.batch_last}.pt"
+    models_file = os.path.join(models_dir, model_filename)
+    
     if last_weight and os.path.exists(last_weight):
+        # Copy model with unique filename
         shutil.copy(last_weight, models_file)
+        # Also save as training-model.pt for compatibility
+        training_model_path = os.path.join(models_dir, "training-model.pt")
+        shutil.copy(last_weight, training_model_path)
     else:
         plan.failed = True
         plan.fail_message = "训练模型文件异常（不存在）"
@@ -303,17 +315,12 @@ def finish_training(plan_id, label_type, working_dir, dataset_entry, epoch_end:i
     plan.status = Plan.STATUS_COMPLETED
     plan.completed_at = now()
     plan.save()
-
-    if label_type == "PolygonLabels":
-        model_kind = "segment"
-    else:
-        model_kind = "detect"
-
+    
     TrainingModels.objects.create(
         batch_no=plan.batch_last,
         plan=plan,
-        name= plan.project_title,
-        path=models_file,
+        name=plan.project_title,
+        path=model_filename,  # Store model filename
         label_type=label_type,
         model_kind=model_kind
     )

@@ -60,6 +60,13 @@ class YoloTrainingManager(object):
         self.training_config = self._parse_training_config(plan)
 
         model_scale = self.training_config.get('model', 'n')
+        # Normalize legacy model names: 'yolov8n' -> 'n', 'yolov5s' -> 's', etc.
+        # Code expects single-letter model scale (n/s/m/l/x)
+        if isinstance(model_scale, str):
+            import re
+            match = re.match(r'^yolov?\d+([nsmlx])(-seg)?$', model_scale.lower())
+            if match:
+                model_scale = match.group(1)
         if label_type == "PolygonLabels":
             self.initial_model = f"yolo26{model_scale}-seg.yaml"
             self.model_kind = "segment"
@@ -93,21 +100,21 @@ class YoloTrainingManager(object):
         self.log_file_handler.setLevel(logging.DEBUG)
         self.log_file_handler.setFormatter(PrefixFormatter("%(message)s"))
 
-def _parse_training_config(self, plan):
-    try:
-        return json.loads(plan.training_config or '{}')
-    except Exception:
-        return {}
+    def _parse_training_config(self, plan):
+        try:
+            return json.loads(plan.training_config or '{}')
+        except Exception:
+            return {}
 
-def _update_heartbeat(self, trainer):
-    """Callback to update heartbeat after each epoch"""
-    try:
-        if self.plan:
-            self.plan.last_heartbeat = now()
-            self.plan.save(update_fields=['last_heartbeat'])
-            logging.info(f"Heartbeat updated for plan {self.plan.id}")
-    except Exception as e:
-        logging.error(f"Failed to update heartbeat for plan {self.plan.id}: {e}")
+    def _update_heartbeat(self, trainer):
+        """Callback to update heartbeat after each epoch"""
+        try:
+            if self.plan:
+                self.plan.last_heartbeat = now()
+                self.plan.save(update_fields=['last_heartbeat'])
+                logging.info(f"Heartbeat updated for plan {self.plan.id}")
+        except Exception as e:
+            logging.error(f"Failed to update heartbeat for plan {self.plan.id}: {e}")
 
     def is_failed(self):
         return self.failed
