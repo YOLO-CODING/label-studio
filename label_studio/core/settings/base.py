@@ -534,8 +534,14 @@ TRAINING_MODEL_DIR = os.path.join(BASE_DATA_DIR, 'training-model')
 os.makedirs(TRAINING_MODEL_DIR, exist_ok=True)
 
 # ML Backend model deployment directory (for serving models to prediction backend)
-ML_BACKEND_MODEL_DIR = get_env('ML_BACKEND_MODEL_DIR', os.path.join(BASE_DATA_DIR, 'ml-backend-models'))
-os.makedirs(ML_BACKEND_MODEL_DIR, exist_ok=True)
+# Must match the path mounted by ML Backend Docker container
+# Container mount: /Users/xupengbing/.warp/.../compose/data/server -> /data
+# So models should be placed in: compose/data/server/models/
+ML_BACKEND_MODEL_DIR_DEFAULT = os.path.join(BASE_DATA_DIR, 'ml-backend-models')
+ML_BACKEND_MODEL_DIR = get_env('ML_BACKEND_MODEL_DIR', ML_BACKEND_MODEL_DIR_DEFAULT)
+if ML_BACKEND_MODEL_DIR != ML_BACKEND_MODEL_DIR_DEFAULT:
+    logger.info(f"ML_BACKEND_MODEL_DIR from env: {ML_BACKEND_MODEL_DIR}")
+    os.makedirs(ML_BACKEND_MODEL_DIR, exist_ok=True)
 
 # file / task size limits
 DATA_UPLOAD_MAX_MEMORY_SIZE = int(get_env('DATA_UPLOAD_MAX_MEMORY_SIZE', 250 * 1024 * 1024))

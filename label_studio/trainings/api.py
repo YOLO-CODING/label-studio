@@ -5,6 +5,8 @@ import django_rq
 import os
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from drf_spectacular.types import OpenApiTypes
@@ -28,7 +30,8 @@ from core.permissions import ViewClassPermission, all_permissions
 
 from plans.models import (
     Plan,
-    TrainingModels
+    TrainingModels,
+    DeploymentHistory
 )
 from trainings.jobs import (
     prepare_training
@@ -36,7 +39,8 @@ from trainings.jobs import (
 from trainings.deployment import (
     inject_model_path,
     copy_model_to_backend,
-    generate_model_filename
+    generate_model_filename,
+    extract_model_labels
 )
 
 from plans.serializers import TrainingModelsSerializer
@@ -119,22 +123,13 @@ class TrainingModelDeployAPI(APIView):
         try:
             model = TrainingModels.objects.get(pk=pk)
             
+            # Allow redeployment - log warning if already deployed
             if model.deployed:
-                return Response({
-                    'error': 'Model already deployed',
-                    'deployed_to_project': model.deployed_to_project,
-                    'deployed_at': model.deployed_at
-                }, status=status.HTTP_400_BAD_REQUEST)
+                logger.warning(f"Redeploying model {pk} (previously deployed to Project {model.deployed_to_project})")
             
             if not model.plan:
                 return Response({
                     'error': 'Model has no associated plan'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
-            if not os.path.exists(model.path):
-                return Response({
-                    'error': 'Source model file not found',
-                    'path': model.path
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             target_filename = generate_model_filename(
@@ -143,8 +138,17 @@ class TrainingModelDeployAPI(APIView):
                 model.batch_no
             )
             
+            # Build source path from model filename and TRAINING_MODEL_DIR
+            source_path = os.path.join(settings.TRAINING_MODEL_DIR, str(model.plan_id), "training-model.pt")
+            
+            if not os.path.exists(source_path):
+                return Response({
+                    'error': f'Source model file not found: {source_path}',
+                    'model_name': model.path  # Return model filename for user reference
+                }, status=status.HTTP_404_NOT_FOUND)
+            
             target_path = copy_model_to_backend(
-                model.path,
+                source_path,
                 target_filename,
                 settings.ML_BACKEND_MODEL_DIR
             )
@@ -156,6 +160,18 @@ class TrainingModelDeployAPI(APIView):
             
             project_id = request.data.get('project_id', model.plan.project_id)
             
+            # Get score threshold from request (default 0.5)
+            try:
+                score_threshold = float(request.data.get('score_threshold', 0.5))
+                if score_threshold < 0 or score_threshold > 1:
+                    return Response({
+                        'error': '置信度必须在 0 到 1 之间'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            except (TypeError, ValueError):
+                return Response({
+                    'error': '置信度参数格式错误'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
             try:
                 from projects.models import Project
                 project = Project.objects.get(pk=project_id)
@@ -164,11 +180,78 @@ class TrainingModelDeployAPI(APIView):
                     'error': f'Project {project_id} not found'
                 }, status=status.HTTP_404_NOT_FOUND)
             
-            modified_config = inject_model_path(
+            # Auto-delete old deployment if project already has one (ensure 1 project = 1 model)
+            old_deployment = DeploymentHistory.objects.filter(project_id=project_id).first()
+            
+            if old_deployment and old_deployment.training_model != model:
+                logger.info(f"Auto-replacing deployment for Project {project_id}: Model {old_deployment.training_model_id} -> Model {model.id}")
+                
+                old_model = old_deployment.training_model
+                old_deployment.delete()
+                
+                # Update old model's deployment status
+                remaining_count = DeploymentHistory.objects.filter(training_model=old_model).count()
+                if remaining_count == 0:
+                    old_model.deployed = False
+                    old_model.deployed_at = None
+                    old_model.deployed_path = None
+                    old_model.deployed_to_project = None
+                    old_model.save()
+                else:
+                    # Update to most recent remaining deployment
+                    last_deployment = DeploymentHistory.objects.filter(
+                        training_model=old_model
+                    ).order_by('-deployed_at').first()
+                    if last_deployment:
+                        old_model.deployed_to_project = last_deployment.project_id
+                        old_model.deployed_at = last_deployment.deployed_at
+                        old_model.deployed_path = last_deployment.deployed_path
+                        old_model.save()
+            
+            # Extract model labels and validate label mapping
+            # Use source_path (original training model) to extract labels, not target_path (copied file)
+            model_labels = extract_model_labels(source_path)
+            logger.info(f"Model labels extracted from {source_path}: {model_labels}")
+            
+            modified_config, validation_result = inject_model_path(
                 project.label_config,
                 target_filename,
-                model.label_type
+                model.label_type,
+                model_labels,
+                score_threshold
             )
+            
+            logger.info(f"Label validation result: {validation_result}")
+            
+            # Block deployment if label validation fails
+            if validation_result and not validation_result.get('valid'):
+                missing_labels = validation_result.get('missing_labels', [])
+                config_labels = validation_result.get('config_labels', [])
+                message = validation_result.get('message', '')
+                model_label_type = validation_result.get('model_label_type')
+                project_label_type = validation_result.get('project_label_type')
+                
+                # Generate user-friendly error message
+                # Check if it's label type mismatch (more specific error)
+                if message and '标签类型不匹配' in message:
+                    error_msg = f"标签类型不匹配，无法部署。\n\n"
+                    error_msg += f"原因：模型训练的标注类型与项目配置的标注类型不一致。\n\n"
+                    error_msg += f"模型标注类型：{model_label_type}（矩形框标注）\n"
+                    error_msg += f"项目标注类型：{project_label_type}（多边形标注）\n\n"
+                    error_msg += "解决方法：\n"
+                    error_msg += "1. 创建新项目，在标签配置中使用 RectangleLabels\n"
+                    error_msg += "2. 或者修改当前项目的标签配置，将 PolygonLabels 改为 RectangleLabels"
+                else:
+                    error_msg = "模型标签与项目标签不匹配，无法部署。\n\n"
+                    error_msg += f"模型识别的标签: {', '.join(missing_labels) if missing_labels else '无'}\n"
+                    error_msg += f"项目配置的标签: {', '.join(config_labels) if config_labels else '无'}\n\n"
+                    error_msg += "请在项目设置中修改标签配置，添加 predicted_values 属性来匹配模型标签。\n"
+                    error_msg += "例如: <Label value=\"warship\" predicted_values=\"ship\" />"
+                
+                return Response({
+                    'error': error_msg,
+                    'label_validation': validation_result
+                }, status=status.HTTP_400_BAD_REQUEST)
             
             if modified_config != project.label_config:
                 project.label_config = modified_config
@@ -178,11 +261,12 @@ class TrainingModelDeployAPI(APIView):
             try:
                 from ml.models import MLBackend
                 
-                ml_backend, created = MLBackend.objects.get_or_create(
+                # Update or create ML Backend association (update title with latest model)
+                ml_backend, created = MLBackend.objects.update_or_create(
                     project=project,
                     url='http://localhost:9090',
                     defaults={
-                        'title': f'YOLO预标注 - {target_filename}',
+                        'title': f'预标注模型 - {target_filename}',
                         'is_interactive': True,
                     }
                 )
@@ -190,26 +274,52 @@ class TrainingModelDeployAPI(APIView):
                 if created:
                     logger.info(f"Created ML Backend association for Project {project_id}")
                 else:
-                    logger.info(f"ML Backend already exists for Project {project_id}")
+                    logger.info(f"Updated ML Backend association for Project {project_id} with model {target_filename}")
                     
             except Exception as e:
                 logger.error(f"Failed to ensure ML Backend association: {e}")
             
             model.deployed = True
             model.deployed_at = now()
-            model.deployed_path = target_path
+            model.deployed_path = target_filename  # Save relative filename, not full path
             model.deployed_to_project = project_id
             model.save()
             
+            # Create deployment history record (project_id is unique, so only one record per project)
+            deployment_history, created = DeploymentHistory.objects.update_or_create(
+                project_id=project_id,  # Find by project_id (unique constraint)
+                defaults={
+                    'training_model': model,  # Update training_model if old deployment exists
+                    'project_title': project.title,
+                    'deployed_path': target_filename,
+                    'deployed_by': request.user if request.user.is_authenticated else None,
+                    'deployed_at': now(),  # Update deployment time
+                }
+            )
+            
+            if created:
+                logger.info(f"Created deployment history for Model {pk} to Project {project_id}")
+            else:
+                logger.info(f"Updated deployment history for Model {pk} to Project {project_id} (redeployed)")
+            
             logger.info(f"Model {pk} deployed successfully to Project {project_id}")
             
-            return Response({
+            response_data = {
                 'message': '模型部署成功',
                 'deployed_path': target_path,
                 'deployed_filename': target_filename,
                 'project_id': project_id,
-                'project_title': project.title
-            }, status=status.HTTP_200_OK)
+                'project_title': project.title,
+                'score_threshold': score_threshold
+            }
+            
+            # Add label validation result
+            if validation_result:
+                response_data['label_validation'] = validation_result
+                if not validation_result.get('valid'):
+                    logger.warning(f"Label validation warning: {validation_result.get('message')}")
+            
+            return Response(response_data, status=status.HTTP_200_OK)
             
         except TrainingModels.DoesNotExist:
             return Response({
@@ -219,4 +329,93 @@ class TrainingModelDeployAPI(APIView):
             logger.error(f"Failed to deploy model {pk}: {e}")
             return Response({
                 'error': f'部署失败: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TrainingModelCancelDeployAPI(APIView):
+    """Cancel deployment of a training model to a specific project"""
+    
+    permission_required = ViewClassPermission()
+    
+    def post(self, request, pk):
+        """
+        Cancel deployment to a specific project.
+        
+        Request body:
+            {
+                "project_id": int  // Required, project to cancel deployment from
+            }
+        
+        Returns:
+            {
+                'message': 'Deployment cancelled',
+                'model_id': int,
+                'project_id': int,
+                'remaining_deployments': int
+            }
+        """
+        try:
+            model = TrainingModels.objects.get(pk=pk)
+            
+            # Get project_id from request
+            project_id = request.data.get('project_id')
+            if not project_id:
+                return Response({
+                    'error': 'project_id is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Find and delete deployment history for this project
+            deployment = DeploymentHistory.objects.filter(
+                training_model=model,
+                project_id=project_id
+            ).first()
+            
+            if not deployment:
+                return Response({
+                    'error': f'No deployment found for Project {project_id}'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Delete the deployment history record
+            deployment.delete()
+            logger.info(f"Deleted deployment history for Model {pk} to Project {project_id}")
+            
+            # Check remaining deployments
+            remaining_count = DeploymentHistory.objects.filter(training_model=model).count()
+            
+            # If no remaining deployments, reset model deployment status
+            if remaining_count == 0:
+                model.deployed = False
+                model.deployed_at = None
+                model.deployed_path = None
+                model.deployed_to_project = None
+                model.save()
+                logger.info(f"Reset deployment status for Model {pk} (no remaining deployments)")
+            else:
+                # Update last deployment info from the most recent deployment
+                last_deployment = DeploymentHistory.objects.filter(
+                    training_model=model
+                ).order_by('-deployed_at').first()
+                
+                if last_deployment:
+                    model.deployed_to_project = last_deployment.project_id
+                    model.deployed_at = last_deployment.deployed_at
+                    model.deployed_path = last_deployment.deployed_path
+                    model.save()
+                    logger.info(f"Updated last deployment info for Model {pk} to Project {last_deployment.project_id}")
+            
+            return Response({
+                'message': f'Successfully cancelled deployment to Project {project_id}',
+                'model_id': pk,
+                'project_id': project_id,
+                'remaining_deployments': remaining_count
+            }, status=status.HTTP_200_OK)
+            
+        except TrainingModels.DoesNotExist:
+            return Response({
+                'error': f'Training model {pk} not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Failed to cancel deployment for model {pk}: {e}")
+            return Response({
+                'error': f'取消部署失败: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

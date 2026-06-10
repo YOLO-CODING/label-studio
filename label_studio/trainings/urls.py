@@ -21,6 +21,8 @@ _api_urlpatterns = [
     }), name='model-detail'),
     # 部署模型
     path('models/<int:pk>/deploy/', api.TrainingModelDeployAPI.as_view(), name='model-deploy'),
+    # 取消部署
+    path('models/<int:pk>/cancel-deploy/', api.TrainingModelCancelDeployAPI.as_view(), name='model-cancel-deploy'),
     # 状态操作路由
     path('<int:pk>/generate/', api.TrainingAPI.as_view({'post': 'generate'}), name='training-generate'),
     path('<int:pk>/start/', api.TrainingAPI.as_view({'post': 'start'}), name='training-start'),
