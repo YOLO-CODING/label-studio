@@ -116,7 +116,7 @@ export const HomePage: Page = () => {
         </Elem>
       </Block>
       <Block name="main-foot">
-        @copyright  <b>CSSC 2025</b>
+        @copyright  中船海丰航空科技有限公司
       </Block>
 
       <section>

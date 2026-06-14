@@ -539,9 +539,14 @@ os.makedirs(TRAINING_MODEL_DIR, exist_ok=True)
 # So models should be placed in: compose/data/server/models/
 ML_BACKEND_MODEL_DIR_DEFAULT = os.path.join(BASE_DATA_DIR, 'ml-backend-models')
 ML_BACKEND_MODEL_DIR = get_env('ML_BACKEND_MODEL_DIR', ML_BACKEND_MODEL_DIR_DEFAULT)
+os.makedirs(ML_BACKEND_MODEL_DIR, exist_ok=True)
 if ML_BACKEND_MODEL_DIR != ML_BACKEND_MODEL_DIR_DEFAULT:
     logger.info(f"ML_BACKEND_MODEL_DIR from env: {ML_BACKEND_MODEL_DIR}")
-    os.makedirs(ML_BACKEND_MODEL_DIR, exist_ok=True)
+else:
+    logger.info(
+        f"ML_BACKEND_MODEL_DIR using default: {ML_BACKEND_MODEL_DIR} "
+        f"(set LABEL_STUDIO_ML_BACKEND_MODEL_DIR to match ML Backend container mount source)"
+    )
 
 # file / task size limits
 DATA_UPLOAD_MAX_MEMORY_SIZE = int(get_env('DATA_UPLOAD_MAX_MEMORY_SIZE', 250 * 1024 * 1024))
