@@ -38,6 +38,7 @@ from trainings.jobs import (
 )
 from trainings.deployment import (
     inject_model_path,
+    remove_model_path,
     copy_model_to_backend,
     generate_model_filename,
     extract_model_labels
@@ -338,51 +339,51 @@ class TrainingModelCancelDeployAPI(APIView):
     permission_required = ViewClassPermission()
     
     def post(self, request, pk):
-        """
-        Cancel deployment to a specific project.
-        
-        Request body:
-            {
-                "project_id": int  // Required, project to cancel deployment from
-            }
-        
-        Returns:
-            {
-                'message': 'Deployment cancelled',
-                'model_id': int,
-                'project_id': int,
-                'remaining_deployments': int
-            }
-        """
         try:
             model = TrainingModels.objects.get(pk=pk)
             
-            # Get project_id from request
             project_id = request.data.get('project_id')
             if not project_id:
-                return Response({
-                    'error': 'project_id is required'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'project_id is required'}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Find and delete deployment history for this project
             deployment = DeploymentHistory.objects.filter(
                 training_model=model,
                 project_id=project_id
             ).first()
             
             if not deployment:
-                return Response({
-                    'error': f'No deployment found for Project {project_id}'
-                }, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': f'No deployment found for Project {project_id}'}, status=status.HTTP_404_NOT_FOUND)
             
-            # Delete the deployment history record
             deployment.delete()
             logger.info(f"Deleted deployment history for Model {pk} to Project {project_id}")
             
-            # Check remaining deployments
+            # Check if this project still has other model deployments
+            remaining_project_deployments = DeploymentHistory.objects.filter(project_id=project_id).count()
+            
+            if remaining_project_deployments == 0:
+                # No other model deployed to this project, clean up label_config and MLBackend
+                try:
+                    from projects.models import Project
+                    project = Project.objects.get(pk=project_id)
+                    
+                    # Remove model_path from label_config
+                    cleaned_config = remove_model_path(project.label_config)
+                    if cleaned_config != project.label_config:
+                        project.label_config = cleaned_config
+                        project.save()
+                        logger.info(f"Removed model_path from label_config of Project {project_id}")
+                    
+                    # Remove MLBackend association
+                    from ml.models import MLBackend
+                    MLBackend.objects.filter(project=project).delete()
+                    logger.info(f"Removed MLBackend associations for Project {project_id}")
+                    
+                except Project.DoesNotExist:
+                    logger.warning(f"Project {project_id} not found, skipping cleanup")
+            
+            # Update TrainingModels deployment status
             remaining_count = DeploymentHistory.objects.filter(training_model=model).count()
             
-            # If no remaining deployments, reset model deployment status
             if remaining_count == 0:
                 model.deployed = False
                 model.deployed_at = None
@@ -391,7 +392,6 @@ class TrainingModelCancelDeployAPI(APIView):
                 model.save()
                 logger.info(f"Reset deployment status for Model {pk} (no remaining deployments)")
             else:
-                # Update last deployment info from the most recent deployment
                 last_deployment = DeploymentHistory.objects.filter(
                     training_model=model
                 ).order_by('-deployed_at').first()
@@ -401,7 +401,6 @@ class TrainingModelCancelDeployAPI(APIView):
                     model.deployed_at = last_deployment.deployed_at
                     model.deployed_path = last_deployment.deployed_path
                     model.save()
-                    logger.info(f"Updated last deployment info for Model {pk} to Project {last_deployment.project_id}")
             
             return Response({
                 'message': f'Successfully cancelled deployment to Project {project_id}',
@@ -411,11 +410,7 @@ class TrainingModelCancelDeployAPI(APIView):
             }, status=status.HTTP_200_OK)
             
         except TrainingModels.DoesNotExist:
-            return Response({
-                'error': f'Training model {pk} not found'
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': f'Training model {pk} not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Failed to cancel deployment for model {pk}: {e}")
-            return Response({
-                'error': f'取消部署失败: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'取消部署失败: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

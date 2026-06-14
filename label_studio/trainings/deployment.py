@@ -253,3 +253,31 @@ def generate_model_filename(plan_id, model_kind, batch_no):
         str: filename (e.g., 'plan16-detect-batch1.pt')
     """
     return f"plan{plan_id}-{model_kind}-batch{batch_no}.pt"
+
+
+def remove_model_path(label_config_xml):
+    """
+    Remove model_path and model_score_threshold attributes from label_config XML.
+    
+    Args:
+        label_config_xml: str, label config XML with model_path attributes
+    
+    Returns:
+        str: cleaned label config XML without model_path attributes
+    """
+    try:
+        root = ET.fromstring(label_config_xml)
+        
+        for tag_name in ['RectangleLabels', 'PolygonLabels']:
+            tag = root.find(f'.//{tag_name}')
+            if tag is not None:
+                if 'model_path' in tag.attrib:
+                    del tag.attrib['model_path']
+                if 'model_score_threshold' in tag.attrib:
+                    del tag.attrib['model_score_threshold']
+        
+        return ET.tostring(root, encoding='unicode')
+        
+    except Exception as e:
+        logger.error(f"Failed to remove model_path: {e}")
+        return label_config_xml
