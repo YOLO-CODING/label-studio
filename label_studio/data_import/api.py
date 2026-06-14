@@ -950,7 +950,19 @@ class DownloadStorageData(APIView):
                 response['Content-Disposition'] = f'inline; filename="{filepath}"'
                 return response
             else:
-                url = file_obj.storage.url(file_obj.name, storage_url=True)
+                # Try to get storage proxy URL (only StorageProxyMixin storages support storage_url kwarg).
+                # For local FileSystemStorage which doesn't support this kwarg, fall through to direct file serving.
+                try:
+                    url = file_obj.storage.url(file_obj.name, storage_url=True)
+                except TypeError:
+                    # Local storage (FileSystemStorage) doesn't accept storage_url kwarg,
+                    # serve file directly using RangedFileResponse instead of X-Accel-Redirect.
+                    content_type, _ = mimetypes.guess_type(filepath)
+                    content_type = content_type or 'application/octet-stream'
+                    response = RangedFileResponse(request, file_obj.open(mode='rb'), content_type=content_type)
+                    response['Content-Disposition'] = f'inline; filename="{filepath}"'
+                    response['filename'] = filepath
+                    return response
 
                 protocol = urlparse(url).scheme
                 response = HttpResponse()
