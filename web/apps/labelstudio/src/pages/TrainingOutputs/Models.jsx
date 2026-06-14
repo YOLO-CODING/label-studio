@@ -15,7 +15,6 @@ import { RiDeleteBin6Line, RiShareForwardFill } from "react-icons/ri";
 import styles from "./Models.scss"
 import Empty  from './Empty'
 import { confirm } from "../../components/Modal/Modal";
-import { Select } from "../../components/Form";
 
 const columnHelper = createColumnHelper();
 
@@ -542,17 +541,27 @@ export const TrainedModelsPage = () => {
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>
                 选择目标项目:
               </label>
-              <Select
+              <select
                 value={targetProjectId}
-                onChange={(val) => setTargetProjectId(val)}
-                options={[
-                  { value: "", label: "请选择项目" },
-                  ...projectsList.map(project => ({
-                    value: project.id.toString(),
-                    label: project.title
-                  }))
-                ]}
-              />
+                onChange={(e) => setTargetProjectId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  backgroundColor: '#fff',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">请选择项目</option>
+                {projectsList.map(project => (
+                  <option key={project.id} value={project.id.toString()}>
+                    {project.title}
+                  </option>
+                ))}
+              </select>
             </div>
             
             {/* 置信度设置 */}
@@ -638,17 +647,27 @@ export const TrainedModelsPage = () => {
               <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px' }}>
                 选择要取消部署的项目:
               </label>
-              <Select
+              <select
                 value={cancelProjectId}
-                onChange={(val) => setCancelProjectId(val)}
-                options={[
-                  { value: "", label: "请选择项目" },
-                  ...(selectedModel.deployment_history || []).map(deployment => ({
-                    value: deployment.project_id.toString(),
-                    label: deployment.project_title
-                  }))
-                ]}
-              />
+                onChange={(e) => setCancelProjectId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  boxSizing: 'border-box',
+                  backgroundColor: '#fff',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">请选择项目</option>
+                {(selectedModel.deployment_history || []).map(deployment => (
+                  <option key={deployment.project_id} value={deployment.project_id.toString()}>
+                    {deployment.project_title}
+                  </option>
+                ))}
+              </select>
             </div>
             
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
