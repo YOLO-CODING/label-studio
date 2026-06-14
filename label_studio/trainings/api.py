@@ -361,22 +361,26 @@ class TrainingModelCancelDeployAPI(APIView):
             remaining_project_deployments = DeploymentHistory.objects.filter(project_id=project_id).count()
             
             if remaining_project_deployments == 0:
-                # No other model deployed to this project, clean up label_config and MLBackend
+                # No other model deployed to this project, clean up label_config
+                # but keep MLBackend association so default model can still be used
                 try:
                     from projects.models import Project
                     project = Project.objects.get(pk=project_id)
                     
-                    # Remove model_path from label_config
+                    # Remove model_path from label_config (project will fall back to default model)
                     cleaned_config = remove_model_path(project.label_config)
                     if cleaned_config != project.label_config:
                         project.label_config = cleaned_config
                         project.save()
                         logger.info(f"Removed model_path from label_config of Project {project_id}")
                     
-                    # Remove MLBackend association
+                    # Keep MLBackend association so project can still use default model
+                    # Only update title to reflect the change (no specific model assigned)
                     from ml.models import MLBackend
-                    MLBackend.objects.filter(project=project).delete()
-                    logger.info(f"Removed MLBackend associations for Project {project_id}")
+                    ml_backends = MLBackend.objects.filter(project=project, url='http://localhost:9090')
+                    if ml_backends.exists():
+                        ml_backends.update(title='预标注模型 - 默认模型')
+                        logger.info(f"Reset MLBackend title for Project {project_id} (will use default model)")
                     
                 except Project.DoesNotExist:
                     logger.warning(f"Project {project_id} not found, skipping cleanup")
