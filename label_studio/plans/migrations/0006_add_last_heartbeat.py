@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("plans", "0001_initial_squashed_0005_add_training_pid"),
+        ("plans", "0005_add_training_pid"),
     ]
 
     operations = [
