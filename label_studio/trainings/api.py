@@ -263,14 +263,24 @@ class TrainingModelDeployAPI(APIView):
                 from ml.models import MLBackend
                 
                 # Update or create ML Backend association (update title with latest model)
-                ml_backend, created = MLBackend.objects.update_or_create(
-                    project=project,
-                    url='http://localhost:9090',
-                    defaults={
-                        'title': f'预标注模型 - {target_filename}',
-                        'is_interactive': True,
-                    }
-                )
+                # 查找键只用 project（每个项目一条 ML Backend）；
+                # URL 从环境变量 ML_BACKEND_URL 取（默认 localhost），避免硬编码 localhost 产生重复记录。
+                # 已存在则只更新 title，不改 URL（保留运维已配置的正确地址）。详见 TROUBLESHOOTING 问题 11。
+                ml_backend_url = os.environ.get('ML_BACKEND_URL', 'http://localhost:9090')
+                ml_backend = MLBackend.objects.filter(project=project).first()
+                if ml_backend:
+                    ml_backend.title = f'预标注模型 - {target_filename}'
+                    ml_backend.is_interactive = True
+                    ml_backend.save(update_fields=['title', 'is_interactive'])
+                    created = False
+                else:
+                    ml_backend = MLBackend.objects.create(
+                        project=project,
+                        url=ml_backend_url,
+                        title=f'预标注模型 - {target_filename}',
+                        is_interactive=True,
+                    )
+                    created = True
                 
                 if created:
                     logger.info(f"Created ML Backend association for Project {project_id}")
@@ -377,7 +387,7 @@ class TrainingModelCancelDeployAPI(APIView):
                     # Keep MLBackend association so project can still use default model
                     # Only update title to reflect the change (no specific model assigned)
                     from ml.models import MLBackend
-                    ml_backends = MLBackend.objects.filter(project=project, url='http://localhost:9090')
+                    ml_backends = MLBackend.objects.filter(project=project)
                     if ml_backends.exists():
                         ml_backends.update(title='预标注模型 - 默认模型')
                         logger.info(f"Reset MLBackend title for Project {project_id} (will use default model)")
