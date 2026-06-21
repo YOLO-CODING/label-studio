@@ -1,0 +1,10 @@
+# YOLO 模型推理依赖
+# ultralytics 必须与训练端（Dockerfile.labelstudio）锁定为同一版本，
+# 否则新版训练的模型（含 Segment26 等新模块类）在推理端反序列化时报 AttributeError，
+# 导致预标注 /predict 返回 500。详见 deploy/TROUBLESHOOTING.md 问题 8。
+ultralytics==8.4.8
+tqdm
+torchmetrics<1.8.0
+numpy<2
+lap==0.5.12
+opencv-python-headless

@@ -8,18 +8,37 @@ PAT = 生产环境（Production Acceptance Test）。本目录归档 label_studi
 ```
 deploy/pat/
 ├── ai-platform/
-│   ├── docker-compose.yml   # ai-platform 容器编排（app/rq/nginx/db/redis/minio）
-│   └── .env.example         # 生产环境变量模板（密钥已脱敏，部署时 cp 后填真实值）
+│   ├── docker-compose.yml        # ai-platform 容器编排（app/rq/nginx/db/redis/minio）
+│   └── .env.example              # 生产环境变量模板（密钥已脱敏，部署时 cp 后填真实值）
 └── ml-backend/
-    ├── docker-compose.yml   # ml-backend 容器编排（ship-segment-backend）
-    └── .env                 # ml-backend 环境变量（LABEL_STUDIO_API_KEY 留空待填）
+    ├── docker-compose.yml        # ml-backend 容器编排（ship-segment-backend）
+    ├── .env                      # ml-backend 环境变量（LABEL_STUDIO_API_KEY 留空待填）
+    ├── Dockerfile.ml-backend     # ml-backend 镜像构建文件（对应外部 deploy/build/）
+    └── ml-backend-requirements.txt # ml-backend Python 依赖（锁 ultralytics==8.4.8，问题 8）
 ```
 
 ## 与外部 deploy/ 的关系
 
-外部 `/Users/xupengbing/Documents/label_studio/deploy/{ai-platform,ml-backend}/`
+外部 `/Users/xupengbing/Documents/label_studio/deploy/{ai-platform,ml-backend,build}/`
 是部署介质的工作目录（不在 git 仓库内）。本目录是其 git 内归档副本，内容应保持一致。
 修改配置时，两边同步更新。
+
+来源对应关系：
+- `deploy/pat/ai-platform/docker-compose.yml`        ← 外部 `deploy/ai-platform/docker-compose.yml`
+- `deploy/pat/ai-platform/.env.example`              ← 外部 `deploy/ai-platform/.env`（密钥脱敏）
+- `deploy/pat/ml-backend/docker-compose.yml`         ← 外部 `deploy/ml-backend/docker-compose.yml`
+- `deploy/pat/ml-backend/.env`                       ← 外部 `deploy/ml-backend/.env`
+- `deploy/pat/ml-backend/Dockerfile.ml-backend`      ← 外部 `deploy/build/Dockerfile.ml-backend`
+- `deploy/pat/ml-backend/ml-backend-requirements.txt` ← 外部 `deploy/build/ml-backend-requirements.txt`
+
+构建时 `deploy/scripts/build.sh:84` 会把 `ml-backend-requirements.txt` 覆盖到构建上下文
+的 `requirements.txt`，再由 `Dockerfile.ml-backend:58` 的 `COPY requirements.txt .`
+装进镜像安装。二者配套，一起归档保证追踪完整。
+
+`ml-backend/Dockerfile.ml-backend` 和 `ml-backend/ml-backend-requirements.txt`
+对应外部 `deploy/build/` 下的同名文件。构建时 `build.sh:84` 会把
+`ml-backend-requirements.txt` 覆盖到构建上下文的 `requirements.txt`，再由
+`Dockerfile.ml-backend:58` 的 `COPY requirements.txt .` 装进镜像安装。二者配套使用。
 
 ## 部署使用方法
 
@@ -64,6 +83,7 @@ cd /opt/ml_backend && docker compose up -d
 | `LABEL_STUDIO_API_KEY` | ml-backend/.env | ml-backend 回连 LS 下载图片的鉴权令牌，须用旧版令牌 | 问题 10 |
 | `user: "1000:0"` | ml-backend/docker-compose.yml | 与 ai-platform 容器 UID 一致，避免共享卷属主冲突 | 问题 6 |
 | `HOME=/tmp` | ml-backend/docker-compose.yml | UID 1000 无家目录，给 appdirs 可写 HOME | 问题 9 |
+| `ultralytics==8.4.8` | ml-backend/ml-backend-requirements.txt | 与训练端版本一致，否则新版模型反序列化报 AttributeError | 问题 8 |
 
 ## 修改配置时的注意事项
 
