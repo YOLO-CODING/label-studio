@@ -36,7 +36,7 @@ def run_yolo_subprocess(plan_id, label_type, working_dir, dataset_entry, epoch_c
     env['PYTORCH_MPS_DISABLE'] = '1'
     env['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = 'YES'
     env['DJANGO_SETTINGS_MODULE'] = 'core.settings.label_studio'
-    env['DJANGO_DB'] = 'sqlite'
+    env['DJANGO_DB'] = 'default'
     
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     script_path = os.path.join(base_dir, 'trainings', 'yolo_train_standalone.py')

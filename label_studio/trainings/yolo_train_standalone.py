@@ -14,6 +14,9 @@ if base_dir not in sys.path:
 
 # Set environment variables BEFORE any imports
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings.label_studio")
+# 注：此 setdefault 只在父进程未设置 DJANGO_DB 时才生效（如 macOS 开发场景）。
+# 生产环境中父进程 trainings/jobs.py:run_yolo_subprocess() 会显式传入 'default'，
+# 这一行实际不会触发。详见 deploy/TROUBLESHOOTING.md 问题 7。
 os.environ.setdefault("DJANGO_DB", "sqlite")
 # Allow GPU configuration from parent process environment (default: disabled for macOS compatibility)
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "")
