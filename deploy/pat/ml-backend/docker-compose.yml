@@ -1,0 +1,57 @@
+name: mlbackend
+
+services:
+  yolo:
+    container_name: ship-segment-backend
+    image: yolo-ship-segment-backend:latest          # 沿用生产命名（升级脚本会 docker tag 转换）
+    restart: unless-stopped
+    # 与 ai-platform 的 app/rq 容器使用相同 UID，避免共享卷 /data/hainan/mlbackend-models 出现属主不匹配
+    # 详见 deploy/TROUBLESHOOTING.md 问题 6
+    user: "1000:0"
+    environment:
+      # 基本认证（留空 = 不启用）
+      - BASIC_AUTH_USER=
+      - BASIC_AUTH_PASS=
+      # 日志级别
+      - LOG_LEVEL=DEBUG
+      # 服务进程配置
+      - WORKERS=1
+      - THREADS=8
+      # 模型目录
+      - MODEL_DIR=/data/models
+      - MODEL_ROOT=/data/models
+      - PYTHONPATH=/app
+      # UID 1000 在容器内无家目录，appdirs(get_data_dir/get_cache_dir) 会退化到根目录 /.local，
+      # 预标注下载任务图片时 makedirs /.local 报 PermissionError。设置可写 HOME 避免此问题。
+      # 详见 deploy/TROUBLESHOOTING.md 问题 9
+      - HOME=/tmp
+
+      # Label Studio 互联
+      - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-http://host.docker.internal:8080}
+      - LABEL_STUDIO_API_KEY=${LABEL_STUDIO_API_KEY}
+
+      # YOLO 参数
+      - ALLOW_CUSTOM_MODEL_PATH=true
+      - DEBUG_PLOT=false
+      - MODEL_SCORE_THRESHOLD=0.5
+
+      # 默认模型配置（覆盖镜像内置 fallback）
+      # 项目 label_config 无 model_path 时（如取消部署后），使用此默认模型
+      # 切换默认模型只需改 .env 后 docker compose restart，无需重建镜像
+      - DEFAULT_MODEL_RECTANGLE_LABELS=${DEFAULT_MODEL_RECTANGLE_LABELS:-ship-segment-best.pt}
+      - DEFAULT_MODEL_POLYGON_LABELS=${DEFAULT_MODEL_POLYGON_LABELS:-ship-segment-best.pt}
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"          # macOS / Linux 通过此别名访问宿主
+    ports:
+      - "9090:9090"
+    volumes:
+      - "/data/hainan/mlbackend-models:/data/models"  # 与 ai-platform 共享模型目录
+      - "./cache_dir:/app/cache_dir"                  # 推理缓存目录
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9090/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

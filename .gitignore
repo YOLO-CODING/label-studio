@@ -22,6 +22,8 @@ venv/
 .autoenv
 .env
 .envrc
+# pat 生产配置：ml-backend/.env 的 LABEL_STUDIO_API_KEY 留空待填，可安全提交
+!deploy/pat/ml-backend/.env
 # web/static
 
 deploy/license.txt
